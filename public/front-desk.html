@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="front-desk.css">
+    <title>Front Desk</title>
+</head>
+
+<body>
+    <h1>Front Desk</h1>
+    <div id="login">
+        <p>Enter access key:</p>
+        <input id="key" type="password" />
+        <button onclick="login()">Login</button>
+        <p id="error"></p>
+    </div>
+
+    <div id="app">
+        <h2>Race Sessions</h2>
+        <ul id="sessions"></ul>
+        <button onclick="addSession()">Add Session</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="front-desk.js"></script>
+</body>
+
+</html>

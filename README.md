@@ -1,0 +1,1 @@
+Command to run server: RECEPTIONIST_KEY=rec123 OBSERVER_KEY=obs123 SAFETY_KEY=saf123 node server.js
