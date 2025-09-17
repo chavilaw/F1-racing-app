@@ -6,16 +6,16 @@ Real-time racetrack system with 7 interfaces that update instantly.
 CURRENT STATUS:
 O Server setup (Express + Socket.IO)
 O Basic front-desk interface
-O  Authentication system
+O Authentication system
 X 6 interfaces missing
 X Race logic missing
 
 STEP 1: FOUNDATION 
 ===============================
-1. Fix package.json - add "start" and "dev" scripts
+1. Fix package.json - add "start" and "dev" scripts (task said use npm start)
 2. Set environment variables (RECEPTIONIST_KEY, OBSERVER_KEY, SAFETY_KEY)
 3. Test server startup
-4. Enhance front-desk (add drivers, car assignment)
+4. Enhance front-desk (add drivers, car assignment, added lists of comments on the html as well)
 
 STEP 2: CORE PART
 ==================================
