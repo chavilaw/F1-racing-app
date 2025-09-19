@@ -1,35 +1,112 @@
 let socket;
+let latestSessions;
 
 function login() {
-    const key = document.getElementById('key').value; // user given key
+    const key = document.getElementById('key').value.trim(); // user given key
+    if (!key) {
+        document.getElementById('error').innerText = 'Enter access key';
+        return;
+    }
+
     socket = io(); // connect to server
 
-    socket.emit('auth', { role: 'receptionist', key }); // send
+    socket.on('sessions', (sessions) => {
+        latestSessions = Array.isArray(sessions) ? sessions : [];
+        renderSessions();
+    });
+
+    socket.on('connection-error', (err) => {
+        console.error('Socket connect error', err);
+        document.getElementById('error').innerText = 'Connection error';
+    });
 
     socket.on('auth-result', (ok) => { // if OK, show race sessions and hide login
         if (ok) {
             document.getElementById('login').style.display = 'none';
             document.getElementById('app').style.display = 'block';
-            
-            if (socket) { // get session updates
-                socket.on('sessions', (sessions) => {
-                    const ul = document.getElementById('sessions');
-                    ul.innerHTML = "";
-                    sessions.forEach(s => {
-                        const li = document.createElement('li');
-                        li.innerText = s.name;
-                        ul.appendChild(li);
-                    });
-                });
-            }
+            document.getElementById('error').innerText = '';
         } else {
             document.getElementById('error').innerText = "Wrong key!";
         }
     });
+    socket.emit('auth', { role: 'receptionist', key });
 }
 
 function addSession() {
+    if (!socket || socket.disconnected) { alert('Not connected. Log in first.'); return; }
     const name = prompt("Enter session name:"); // popup asks input
-    if (name) socket.emit('add-session', { name }); // server updates sessions
+    if (!name) return;
+
+    const id = Date.now();
+    const payload = { id, name };
+
+    socket.emit('add-session', payload, (res) => {
+        if (res && res.error) alert('Error creating session: ' + res.error);
+    });
 }
 
+function addDriverToSession(sessionId) {
+    if (!socket || socket.disconnected) { alert('Not connected. Log in first.'); return; }
+    const name = prompt('Enter driver name:');
+    if (!name) return;
+
+    socket.emit('add-driver', { sessionId, name }, (res) => {
+        if (res && res.error) {
+            alert('Could not add driver: ' + res.error);
+        } else {
+            console.log('Driver added', res && res.driver);
+        }
+    });
+}
+
+function removeDriverFromSession(sessionId, driverName) {
+    if (!socket || socket.disconnected) { alert('Not connected. Log in first.'); return; }
+    if (!confirm(`Remove driver ${driverName}?`)) return;
+    socket.emit('remove-driver', {sessionId, name: driverName }, (res) => {
+        if (res && res.error) alert('Could not remove driver: ' + res.error);
+    });
+}
+
+function renderSessions() {
+    const ul = document.getElementById('sessions');
+    ul.innerHTML = '';
+
+    if (!latestSessions || latestSessions.length === 0) {
+        ul.innerHTML = '<li><em>No sessions</em></li>';
+        return;
+    }
+
+    latestSessions.forEach(s => {
+        const li = document.createElement('li');
+
+        const header = document.createElement('div');
+        header.innerHTML = `<strong>ID: ${s.id}</strong> | Name: ${s.name} |&nbsp;<small>(${(s.drivers||[]).length}/8 drivers)</small>`;
+        li.appendChild(header);
+
+        const addBtn = document.createElement('button');
+        addBtn.textContent = 'Add driver';
+        addBtn.style.margin = '6px 6px 6px 0';
+        if ((s.drivers || []).length >= 8) {
+            addBtn.disabled = true;
+            addBtn.title = 'Max 8 drivers';
+        } else {
+            addBtn.onclick = () => addDriverToSession(s.id);
+        }
+        li.appendChild(addBtn);
+
+        const dl = document.createElement('ul');
+        (s.drivers || []).forEach(d => {
+            const dli = document.createElement('li');
+            dli.textContent = `Car ${d.carNumber} - ${d.name}`;
+            const rem = document.createElement('button');
+            rem.textContent = 'Remove';
+            rem.style.marginLeft = '8px';
+            rem.onclick = () => removeDriverFromSession(s.id, d.name);
+            dli.appendChild(rem);
+            dl.appendChild(dli);
+        });
+        li.appendChild(dl);
+
+        ul.appendChild(li);
+    });
+}
