@@ -1,12 +1,15 @@
 let socket;
 let latestSessions;
 
-function login() {
-    const key = document.getElementById('key').value.trim(); // user given key
-    if (!key) {
-        document.getElementById('error').innerText = 'Enter access key';
+document.addEventListener('DOMContentLoaded', function() {
+    const key = sessionStorage.getItem('racetrack_key');
+    const role = localStorage.getItem('racetrack_role');
+
+    if (!key || !role) {
+        window.location.href = '/login.html';
         return;
     }
+    console.log(key);
 
     socket = io(); // connect to server
 
@@ -20,17 +23,17 @@ function login() {
         document.getElementById('error').innerText = 'Connection error';
     });
 
-    socket.on('auth-result', (ok) => { // if OK, show race sessions and hide login
+    socket.emit('auth', { role, key });
+
+    socket.on('auth-result', (ok) => { // if OK, show race sessions
         if (ok) {
-            document.getElementById('login').style.display = 'none';
             document.getElementById('app').style.display = 'block';
             document.getElementById('error').innerText = '';
         } else {
             document.getElementById('error').innerText = "Wrong key!";
         }
     });
-    socket.emit('auth', { role: 'receptionist', key });
-}
+});
 
 function addSession() {
     if (!socket || socket.disconnected) { alert('Not connected. Log in first.'); return; }

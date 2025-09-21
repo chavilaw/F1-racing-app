@@ -16,7 +16,7 @@ app.use(express.static('public')); // anything in public/ can be viewed in the b
 
 server.listen(3000, () => {
   console.log('Server listening on http://localhost:3000');
-  console.log('http://localhost:3000/front-desk.html');
+  console.log('http://localhost:3000/login.html');
 });
 
 let sessions = [];
