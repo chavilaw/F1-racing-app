@@ -1,0 +1,60 @@
+RACE CONTROL INTERFACE (/race-control)
+
+User: Safety Official (tablet, outdoor use)
+Context: Control room or outdoor station
+
+Controls the race state 
+Manages the timer 
+Sets race modes 
+Broadcasts race events to all other interfaces
+Does NOT track individual car movements
+
+KEY FEATURES NEEDED:
+
+1. LAYOUT ELEMENTS:
+ Large timer display at top - Most prominent element
+ Race mode buttons (Safe/Hazard/Danger/Finish) - Color-coded
+ Start/Stop race controls - Primary action buttons
+ Current race info panel - Shows active session details
+
+2. COLOR SCHEME:
+ Safe mode: Green (#28A745)
+ Hazard mode: Yellow (#FFC107)
+ Danger mode: Red (#DC3545)
+ Finish mode: Black/White checkered pattern
+
+3. KEY ELEMENTS:
+ Prominent timer (large, easy to read)
+ Color-coded race mode buttons
+ Current race status display
+ Driver briefing information
+
+4. UX CONSIDERATIONS:
+ One-handed operation possible
+ Large touch targets (tablet-friendly)
+ Clear visual state indicators
+ Quick access to emergency controls
+
+
+let socket;
+let currentRace;     // Active race session
+let raceMode;        // safe/hazard/danger/finish
+let raceTimer;       // Timer state
+let raceStatus;   
+
+Socket.IO Events to Handle:
+
+ auth - Authentication with SAFETY_KEY
+ race-start - Start race event
+ race-stop - Stop race event
+ race-mode-change - Change race mode
+ race-timer-update - Timer updates
+ race-status-update - Race state changes
+
+Core Functionality:
+
+ Start/stop race buttons
+ Race mode selection (4 modes)
+ 10-minute timer display
+ Real-time updates to all other interfaces
+ Emergency controls for safety

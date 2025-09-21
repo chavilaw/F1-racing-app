@@ -7,7 +7,6 @@ Quick Start (1 hour total):
 1. Check out F1 website - copy their colors
 2. Use Bootstrap - just copy/paste their examples
 3. Test on your phone - make sure it works
-4. Done! Don't overthink it
 
 Easy Tools:
 - Bootstrap: https://getbootstrap.com/ (just copy their examples)
