@@ -62,6 +62,27 @@ function addDriverToSession(sessionId) {
     });
 }
 
+function editDriver(sessionId, oldName, currentCar) {
+    if (!socket || socket.disconnected) { alert('Not connected. Log in first.'); return; }
+
+    const newName = prompt('Edit driver name', oldName);
+    if (newName == null) return;
+
+    const carInput = prompt('Edit car number (1-8) - leave empty to keep current', currentCar || '');
+    const carNumber = (carInput === null || carInput.trim() === '') ? null : carInput.trim();
+
+    const payload = { sessionId, oldName, newName };
+    if (carNumber != null) payload.carNumber = carNumber;
+
+    socket.emit('edit-driver', payload, (res) => {
+        if (res && res.error) {
+            alert('Could not edit driver: ' + res.error);
+        } else {
+            console.log('Driver edited', res && res.driver);
+        }
+    });
+}
+
 function removeDriverFromSession(sessionId, driverName) {
     if (!socket || socket.disconnected) { alert('Not connected. Log in first.'); return; }
     if (!confirm(`Remove driver ${driverName}?`)) return;
@@ -101,6 +122,13 @@ function renderSessions() {
         (s.drivers || []).forEach(d => {
             const dli = document.createElement('li');
             dli.textContent = `Car ${d.carNumber} - ${d.name}`;
+
+            const edit = document.createElement('button');
+            edit.textContent = 'Edit';
+            edit.style.marginLeft = '8px';
+            edit.onclick = () => editDriver(s.id, d.name, d.carNumber);
+            dli.appendChild(edit);
+
             const rem = document.createElement('button');
             rem.textContent = 'Remove';
             rem.style.marginLeft = '8px';

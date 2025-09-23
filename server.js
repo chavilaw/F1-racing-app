@@ -67,6 +67,8 @@ io.on('connection', (socket) => { // socket object for every unique user
     const id = data.id || (Date.now());
     if (getSession(id)) return cb && cb({ error: 'session id already exists' });
 
+    if (sessions.find(s => String(s.name) === String(data.name))) return cb && cb({ error: 'session name already exists' });
+
     const newSession = { id, name: data.name, drivers: [] };
     sessions.push(newSession);
     broadcastSessions(); // broadcast to everyone
@@ -108,6 +110,33 @@ io.on('connection', (socket) => { // socket object for every unique user
     cb && cb({ ok: true, driver });
   });
 
+  socket.on('edit-driver', (payload, cb) => {
+    if (!isAuthorized(socket, 'receptionist')) return cb && cb({ error: 'not authorized' });
+    if (!payload || !payload.sessionId || !payload.oldName || !payload.newName) return cb && cb({ error: 'invalid payload' });
+
+    const s = getSession(payload.sessionId);
+    if (!s) return cb && cb({ error: 'session not found' });
+
+    const d = (s.drivers || []).find(x => x.name === payload.oldName);
+    if (!d) return cb && cb({ error: 'driver not found' });
+
+    if (payload.newName !== payload.oldName && (s.drivers || []).some(x => x.name === payload.newName)) {
+      return cb && cb({ error: 'new driver name already used in this session' });
+    }
+
+    if (payload.carNumber != null) {
+      const desired = Number(payload.carNumber);
+      if (isNaN(desired) || desired < 1 || desired > 8) return cb && cb({ error: 'car number must be from 1 to 8' });
+      const conflict = (s.drivers || []).some(x => x.name !== payload.oldName && Number(x.carNumber) === desired);
+      if (conflict) return cb && cb({ error: 'car number already assigned in this session' });
+      d.carNumber = desired;
+    }
+
+    d.name = payload.newName;
+    broadcastSessions();
+    cb && cb({ ok: true, driver: d });
+  });
+
   socket.on('remove-driver', (payload, cb) => {
     if (!isAuthorized(socket, 'receptionist')) return cb && cb({ error: 'not authorized' });
     if (!payload || !payload.sessionId || !payload.name) return cb && cb({ error: 'invalid payload' });
@@ -122,7 +151,7 @@ io.on('connection', (socket) => { // socket object for every unique user
 
     broadcastSessions();
     cb && cb({ ok: true });
-  })
+  });
 
 
 });
