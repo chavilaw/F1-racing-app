@@ -1,6 +1,7 @@
 const { resolveMx } = require('dns');
 const express = require('express'); // tool to serve pages
 const http = require('http'); // required by Socket.IO
+const path = require('path');
 const { Server } = require('socket.io'); // real-time connections
 
 if (!process.env.RECEPTIONIST_KEY || !process.env.OBSERVER_KEY || !process.env.SAFETY_KEY) { // IF KEYS NOT SET, SERVER WILL NOT START
@@ -12,11 +13,15 @@ const app = express(); // "app" is the Express web app
 const server = http.createServer(app); // "server" is the HTTP server that Express runs on
 const io = new Server(server); // "io" is the Socket.IO server attached to the HTTP server
 
-app.use(express.static('public')); // anything in public/ can be viewed in the browser
+app.use(express.static(path.join(__dirname, 'public'))); // anything in public/ can be viewed in the browser
+
+app.get('/', (req, res) => {
+  res.sendFile('index.html');
+});
 
 server.listen(3000, () => {
   console.log('Server listening on http://localhost:3000');
-  console.log('http://localhost:3000/login.html');
+  console.log('http://localhost:3000/login.html'); // can add more direct links for testing purposes
 });
 
 let sessions = [];
