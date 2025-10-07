@@ -51,9 +51,12 @@ function addSession() {
 function addDriverToSession(sessionId) {
     if (!socket || socket.disconnected) { alert('Not connected. Log in first.'); return; }
     const name = prompt('Enter driver name:');
-    if (!name) return;
+    if (name == null) return;
 
-    socket.emit('add-driver', { sessionId, name }, (res) => {
+    const carInput = prompt('Enter car number (1-8) - leave empty to automatically assign')
+    const carNumber = (carInput === null || carInput.trim() === '') ? null : carInput.trim();
+
+    socket.emit('add-driver', { sessionId, name, carNumber }, (res) => {
         if (res && res.error) {
             alert('Could not add driver: ' + res.error);
         } else {
