@@ -8,7 +8,6 @@ let currentRaceMode = 'SAFE';
 let raceStartTime = null;
 let currentSession = null;
 
-
 document.addEventListener('DOMContentLoaded', () => {
   // 1) auth info from login.html
   const key  = sessionStorage.getItem('racetrack_key');
@@ -17,19 +16,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!key) { window.location.href = '/login.html'; return; }
   if (role !== 'observer') { role = 'observer'; localStorage.setItem('racetrack_role', 'observer'); }
 
-  // UI elements in html
-  const app = $('#app');
-  const errorBox = $('#error');
-  const sessionsSelect = $('#sessionSelect');
-  const grid = $('#grid');
-
- // 2) connect + auth
+  // 2) connect + auth
   socket = io();
   socket.emit('auth', { role, key });
 
   socket.on('auth-result', (ok) => {
     if (!ok) { showError('Wrong key!'); return; }
     clearError();
+
+    // make sure the UI becomes visible
+    document.getElementById('app').style.display = 'block';
+
     // Ask for initial sessions snapshot (in case nobody is changing sessions yet)
     socket.emit('get-sessions');
   });
@@ -63,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 4) click to emit lap (gated by race state)
-  grid.addEventListener('click', (e) => {
+  document.getElementById('grid').addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-car]');
     if (!btn) return;
     const carNumber = Number(btn.dataset.car);
@@ -119,21 +116,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // ----- helpers -----
 
   // basically just the info panel same as safety officer but read only
-    function updateRaceInfoPanel() {
-    document.getElementById('sessions').textContent = currentSession?.name || 'No session selected';
-    document.getElementById('driver-count').textContent = `${(currentSession?.drivers || []).length}/8 drivers`;
+  function updateRaceInfoPanel() {
+    document.getElementById('sessions').textContent =
+      currentSession?.name || 'No session selected';
+    document.getElementById('driver-count').textContent =
+      `${(currentSession?.drivers || []).length}/8 drivers`;
     document.getElementById('current-race-mode').textContent = currentRaceMode;
 
     if (raceActive && raceStartTime) {
-        const elapsed = Math.floor((Date.now() - raceStartTime) / 1000);
-        document.getElementById('race-duration').textContent = `${elapsed} seconds elapsed`;
+      const elapsed = Math.floor((Date.now() - raceStartTime) / 1000);
+      document.getElementById('race-duration').textContent = `${elapsed} seconds elapsed`;
     } else {
-        document.getElementById('race-duration').textContent = 'Race not started';
+      document.getElementById('race-duration').textContent = 'Race not started';
     }
-    }
+  }
 
   function renderSessionsDropdown() {
-    const sessionsSelect = $('#sessionSelect');
+    const sessionsSelect = document.getElementById('sessionSelect');
     sessionsSelect.innerHTML = '';
 
     if (!latestSessions.length) {
@@ -171,8 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-    function renderCarButtons() {
-    const grid = $('#grid');
+  function renderCarButtons() {
+    const grid = document.getElementById('grid');
     grid.innerHTML = '';
 
     const session = latestSessions.find(s => String(s.id) === String(currentSessionId));
@@ -210,18 +209,19 @@ document.addEventListener('DOMContentLoaded', () => {
     return !sessionId || String(sessionId) === String(currentSessionId);
   }
 
-  function showError(msg){ errorBox.textContent = msg; }
-  function clearError(){ errorBox.textContent = ''; }
+  function showError(msg){
+    document.getElementById('error').textContent = msg;
+  }
+  function clearError(){
+    document.getElementById('error').textContent = '';
+  }
 });
 
 function initializeLogout() {
-    document.getElementById('logout').addEventListener('click', () => { 
-        sessionStorage.removeItem('racetrack_key');
-        localStorage.removeItem('racetrack_role');
-        socket.disconnect();
-        window.location.href = '/login.html';
-    });
+  document.getElementById('logout').addEventListener('click', () => { 
+    sessionStorage.removeItem('racetrack_key');
+    localStorage.removeItem('racetrack_role');
+    socket.disconnect();
+    window.location.href = '/login.html';
+  });
 }
-
-// helper to select single element might take off when using bootstrap later 
-function $(sel){ return document.querySelector(sel); }
