@@ -6,6 +6,98 @@
     <link rel="stylesheet" href="race-control.css">
 </head>
 <body>
+
+    <header>
+        <h1>Race Control</h1>
+        <p>Safety Official Dashboard</p>
+        <p id="race-status"></p>
+    </header>
+    <!-- 
+    - Add a massive countdown timer display
+    - Show time remaining (e.g., "10:00" or "05:23")
+    - Make it the biggest, most prominent element on the page
+    - Add timer status text: "Race Timer" or "Time Remaining"-->
+
+    <div class="timer" id="timer">
+        <p id="timer-text"></p>
+        <p id="timer-status"></p>
+    </div>
+
+    <!-- RACE MODE BUTTONS (4 Buttons):
+    - Safe Mode Button - Green color, "SAFE" text
+    - Hazard Mode Button - Yellow color, "HAZARD" text  
+    - Danger Mode Button - Red color, "DANGER" text
+    - Finish Mode Button - Black/white checkered, "FINISH" text-->
+    
+    <div class="race-mode" id="race-mode-btn">
+        <button id="safe-mode-btn">SAFE</button>
+        <button id="hazard-mode-btn">HAZARD</button>
+        <button id="danger-mode-btn">DANGER</button>
+        <button id="finish-mode-btn">FINISH</button>
+    </div>
+
+    <!-- RACE CONTROL BUTTONS:
+    - Start Race Button - Large, prominent, green background
+    - Stop Race Button - Large, prominent, red background
+    - Emergency Stop Button - Extra large, red, "EMERGENCY STOP" 
+    -->
+
+    <div class="race-control" id="race-control-buttons">
+        <button id="start-race-btn">Start Race</button>
+        <button id="stop-race-btn">Stop Race</button>
+        <button id="emergency-stop-btn">Emergency Stop</button>
+    </div>
+    
+    <!-- CURRENT RACE INFO PANEL:
+    - Show active session name
+    - Show number of drivers (e.g., "5/8 drivers")
+    - Show current race mode
+    - Show race duration 
+    
+    side panel  -->
+    <div class="race-info" id="side-panel">
+        <h3>Race Information</h3>
+        <p><strong>Session:</strong> <span id="sessions"></span></p>
+        <p><strong>Drivers:</strong> <span id="driver-count"></span></p>
+        <p><strong>Mode:</strong> <span id="current-race-mode"></span></p>
+        <p><strong>Duration:</strong> <span id="race-duration"></span></p>
+    </div>
+
+    <div id="app" style="display: none;">
+        <h2>Race Sessions</h2>
+        <ul id="sessions-list"></ul>
+    </div>
+
+    <!-- DRIVER BRIEFING SECTION:
+    - List of current drivers
+    - Car numbers (1-8)
+    - Driver names
+    - Current positions
+    
+    -->
+
+    <div class="driver-briefing">
+        <h3>Current Drivers</h3>
+        <ul id="driver-list"></ul>
+    </div>
+
+    <footer>
+        <button id="logout">Logout</button>
+    </footer>
+
+    <!-- 
+
+    7. FOOTER:
+    - Add logout button
+    
+    LAYOUT PRIORITY:
+    1. Timer (top, biggest)
+    2. Race Mode Buttons (middle, prominent)
+    3. Start/Stop Controls (middle, large)
+    4. Race Info (side panel)
+    5. Driver List (bottom)
+    -->
+    
     <script src="/socket.io/socket.io.js"></script>
     <script src="race-control.js"></script>
 </body>
