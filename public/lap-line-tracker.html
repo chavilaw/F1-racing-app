@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Lap Line Tracker</title>
+</head>
+<body>
+  <h1>Lap Line Tracker</h1>
+    
+  <div class="race-info" id="side-panel">
+        <h3>Race Information</h3>
+        <p><strong>Session:</strong> <span id="sessions"></span></p>
+        <p><strong>Drivers:</strong> <span id="driver-count"></span></p>
+        <p><strong>Mode:</strong> <span id="current-race-mode"></span></p>
+        <p><strong>Duration:</strong> <span id="race-duration"></span></p>
+    </div>
+
+  <div id="error"></div>
+
+  <div id="app">
+    <label for="sessionSelect">Session:</label>
+    <select id="sessionSelect"></select>
+
+    <div id="grid"></div>
+  </div>
+
+    <footer>
+        <button id="logout">Logout</button>
+    </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/lap-line-tracker.js"></script>
+</body>
+</html>
