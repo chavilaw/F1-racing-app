@@ -6,6 +6,9 @@ let latestSessions;
 // TODO: Listen for session data updates
 // TODO: Handle connection errors
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize timer immediately when page loads
+    initializeTimer();
+    
     const key = sessionStorage.getItem('racetrack_key');
     const role = localStorage.getItem('racetrack_role');
 
@@ -19,6 +22,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     socket.on('sessions', (sessions) => {
         latestSessions = Array.isArray(sessions) ? sessions : [];
+        
+        // For testing: if no sessions exist, create a test session
+        if (latestSessions.length === 0) {
+            console.log('No sessions found, creating test session for demo...');
+            const testSession = {
+                id: 'test-session-' + Date.now(),
+                name: 'Test Race Session',
+                drivers: [
+                    { name: 'Test Driver 1', carNumber: 1, currentPosition: 1, status: 'Ready' },
+                    { name: 'Test Driver 2', carNumber: 2, currentPosition: 2, status: 'Ready' }
+                ]
+            };
+            latestSessions = [testSession];
+        }
+        
         renderSessions();
     });
 
@@ -32,9 +50,11 @@ document.addEventListener('DOMContentLoaded', function() {
     socket.on('auth-result', (ok) => { // if OK, show race sessions
         if (ok) {
             document.getElementById('app').style.display = 'block';
-            document.getElementById('error').innerText = '';
+            const errorElement = document.getElementById('error');
+            if (errorElement) {
+                errorElement.innerText = '';
+            }
 
-            initializeTimer();
             initializeRaceModeButtons();
             initializeRaceControlButtons();
             initializeRaceInfoPanel();
@@ -42,7 +62,10 @@ document.addEventListener('DOMContentLoaded', function() {
             initializeLogout();
 
         } else {
-            document.getElementById('error').innerText = "Wrong key!";
+            const errorElement = document.getElementById('error');
+            if (errorElement) {
+                errorElement.innerText = "Wrong key!";
+            }
         }
     });
 });
@@ -63,14 +86,48 @@ let currentRaceMode = 'SAFE'; // Default race mode
 
 
 function initializeTimer() {
-    document.getElementById('timer').style.display = 'block';
-    document.getElementById('timer-text').textContent = '00:00';
-    document.getElementById('timer-status').textContent = raceActive ? 'Time Remaining' : 'Race Timer'; //or Race Timer
-
+    console.log('Initializing timer...');
+    
+    const timerElement = document.getElementById('timer');
+    const timerText = document.getElementById('timer-text');
+    const timerStatus = document.getElementById('timer-status');
+    
+    console.log('Timer elements found:', timerElement, timerText, timerStatus);
+    
+    if (timerElement) {
+        timerElement.style.display = 'block';
+        console.log('Timer display set to block');
+    } else {
+        console.error('Timer element not found!');
+    }
+    
+    if (timerText) {
+        timerText.textContent = '00:00';
+        console.log('Timer text set to 00:00');
+    } else {
+        console.error('Timer text element not found!');
+    }
+    
+    if (timerStatus) {
+        timerStatus.textContent = raceActive ? 'Time Remaining' : 'Race Timer';
+        console.log('Timer status set to:', timerStatus.textContent);
+    } else {
+        console.error('Timer status element not found!');
+    }
+    
+    console.log('Timer initialization complete');
 }
 
 
 function startTimer(duration) {
+    console.log('Starting timer with duration:', duration);
+    
+    // Check if there's a current session
+    if (!currentSession) {
+        alert('No race session selected. Please create a session first using the Front Desk interface.');
+        return;
+    }
+    
     timeLeft = duration;
 
     raceActive = true;
@@ -81,6 +138,7 @@ function startTimer(duration) {
 
     timerInterval = setInterval(() => {
         timeLeft--;
+        console.log('Timer tick - timeLeft:', timeLeft);
         updateDisplay();
 
         if (timeLeft <= 0) {
@@ -89,6 +147,7 @@ function startTimer(duration) {
     }, 1000); //every second
 
     updateButtonStates();
+    console.log('Timer started, raceActive:', raceActive, 'timeLeft:', timeLeft);
 }
 
 function stopTimer() {
@@ -117,11 +176,27 @@ function timeExpired() {
 }
 
 function updateDisplay() { //refresh screen
+    console.log('updateDisplay called - timeLeft:', timeLeft);
     const min = Math.floor(timeLeft / 60);
     const sec = timeLeft % 60;
     
-    document.getElementById('timer-text').textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-    document.getElementById('timer-status').textContent = raceActive ? 'Time Remaining' : 'Race Timer';
+    const timerText = document.getElementById('timer-text');
+    const timerStatus = document.getElementById('timer-status');
+    
+    console.log('Timer elements found:', timerText, timerStatus);
+    
+    if (timerText) {
+        timerText.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        console.log('Timer text updated to:', timerText.textContent);
+    } else {
+        console.error('timer-text element not found!');
+    }
+    
+    if (timerStatus) {
+        timerStatus.textContent = raceActive ? 'Time Remaining' : 'Race Timer';
+    } else {
+        console.error('timer-status element not found!');
+    }
 }
 
 
@@ -142,40 +217,60 @@ function initializeRaceModeButtons() {
 }
 
 function setRaceMode(mode) { //handle mode clicks
-
+    console.log('Race mode changed to:', mode);
     currentRaceMode = mode.toUpperCase();
+    
     // btn visual update
     document.getElementById('safe-mode-btn').classList.remove('active');
     document.getElementById('hazard-mode-btn').classList.remove('active');
     document.getElementById('danger-mode-btn').classList.remove('active');
     document.getElementById('finish-mode-btn').classList.remove('active');
 
-    document.getElementById(`${mode}-mode-btn`).classList.add('active'); // replace if statement in golang
+    document.getElementById(`${mode}-mode-btn`).classList.add('active');
 
-    // socket communication
+    // socket communication - broadcast to all other interfaces
     socket.emit('race-mode-change', { mode, sessionId: currentSession?.id });
 
-    // Update race mode
+    // Update race mode in the info panel
     document.getElementById('current-race-mode').textContent = mode.toUpperCase();
+    
+    console.log('Race mode updated to:', currentRaceMode);
 }
 
-// TODO: Race control buttons
-// - Start race functionality
-// - Stop race functionality  
-// - Emergency stop functionality
-// - Update button states
-
 function initializeRaceControlButtons() {
+    console.log('Initializing race control buttons...');
 
-    startBtn = document.getElementById('start-race-btn');
-    stopBtn = document.getElementById('stop-race-btn');
-    emergencyBtn = document.getElementById('emergency-stop-btn');
+    // Add a small delay to ensure DOM is fully loaded
+    setTimeout(() => {
+        startBtn = document.getElementById('start-race-btn');
+        stopBtn = document.getElementById('stop-race-btn');
+        emergencyBtn = document.getElementById('emergency-stop-btn');
 
-    startBtn.addEventListener('click', () => startTimer(300));
-    stopBtn.addEventListener('click', () => stopTimer());
-    emergencyBtn.addEventListener('click', () => stopTimer());
+        console.log('Start button found:', startBtn);
+        console.log('Stop button found:', stopBtn);
+        console.log('Emergency button found:', emergencyBtn);
+
+    if (startBtn) {
+        console.log('Start button found, adding click listener...');
+        startBtn.addEventListener('click', () => {
+            console.log('Start button clicked!');
+            startTimer(300);
+        });
+        console.log('Click listener added successfully');
+    } else {
+        console.error('Start button not found!');
+    }
+
+    if (stopBtn) {
+        stopBtn.addEventListener('click', () => stopTimer());
+    }
+
+    if (emergencyBtn) {
+        emergencyBtn.addEventListener('click', () => stopTimer());
+    }
 
     updateButtonStates();
+    }, 100); // 100ms delay
 }
 
 function updateButtonStates() {
