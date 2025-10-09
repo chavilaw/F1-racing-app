@@ -168,5 +168,12 @@ io.on('connection', (socket) => { // socket object for every unique user
     cb && cb({ ok: true });
   });
 
+  socket.on('timer-update', (raceData) => { // re-broadcast timer
+    if (socket.role !== 'safety') { 
+      console.warn('Unauthorized timer update attempt');
+    }
+
+    io.emit('timer-update', raceData);
+  });
 
 });
