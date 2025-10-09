@@ -344,12 +344,4 @@ USER TESTING:
 □ Spectators can easily read leaderboard
 □ Drivers can find their information quickly
 
-NOTES
-=====
 
-- Use CSS Grid/Flexbox for responsive layouts
-- Implement CSS custom properties for consistent theming
-- Use JavaScript for real-time updates and interactions
-- Test on actual devices (tablets, large displays)
-- Consider outdoor visibility for track-side displays
-- Ensure all interfaces work without internet (local network only)

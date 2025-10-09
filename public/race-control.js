@@ -141,6 +141,14 @@ function startTimer(duration) {
         console.log('Timer tick - timeLeft:', timeLeft);
         updateDisplay();
 
+        // Broadcast timer data to all connected clients
+        socket.emit('timer-update', {
+            timeLeft: timeLeft,
+            raceActive: raceActive,
+            raceMode: currentRaceMode,
+            sessionId: currentSession?.id
+        });
+
         if (timeLeft <= 0) {
             timeExpired();
         }
@@ -156,6 +164,14 @@ function stopTimer() {
     socket.emit('race-stopped', {sessionId: currentSession?.id});
 
     clearInterval(timerInterval); //stop it
+
+    // Broadcast timer stopped to all clients
+    socket.emit('timer-update', {
+        timeLeft: 0,
+        raceActive: false,
+        raceMode: currentRaceMode,
+        sessionId: currentSession?.id
+    });
 
     updateButtonStates();
 }
@@ -233,6 +249,14 @@ function setRaceMode(mode) { //handle mode clicks
 
     // Update race mode in the info panel
     document.getElementById('current-race-mode').textContent = mode.toUpperCase();
+    
+    // Broadcast timer update with new race mode
+    socket.emit('timer-update', {
+        timeLeft: timeLeft,
+        raceActive: raceActive,
+        raceMode: currentRaceMode,
+        sessionId: currentSession?.id
+    });
     
     console.log('Race mode updated to:', currentRaceMode);
 }
