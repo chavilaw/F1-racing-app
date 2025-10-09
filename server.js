@@ -85,6 +85,8 @@ io.on('connection', (socket) => { // socket object for every unique user
     if (!isAuthorized(socket, 'receptionist')) return cb && cb({ error: 'not authorized' });
     if (!payload || !payload.sessionId || !payload.name) return cb && cb({ error: 'invalid payload' });
 
+    carNum = payload.carNumber;
+
     const s = getSession(payload.sessionId);
     if (!s) return cb && cb({ error: 'session not found' });
 
@@ -96,14 +98,22 @@ io.on('connection', (socket) => { // socket object for every unique user
       return cb && cb({ error: 'driver name already exists in this session' });
     }
 
-    const carNumber = getAvailableCarNumber(s);
-    if (carNumber == null) {
-      return cb && cb({ error: 'no car numbers available' });
+    if (carNum != null) {
+      const desired = Number(carNum);
+      if (isNaN(desired) || desired < 1 || desired > 8) return cb && cb({ error: 'car number must be from 1 to 8' });
+      const conflict = (s.drivers || []).some(x => x.name !== payload.oldName && Number(x.carNumber) === desired);
+      if (conflict) return cb && cb({ error: 'car number already assigned in this session' });
+      carNum = desired;
+    } else {
+      carNum = getAvailableCarNumber(s);
+      if (carNum == null) {
+        return cb && cb({ error: 'no car numbers available' });
+      }
     }
 
     const driver = {
       name: payload.name,
-      carNumber: carNumber,
+      carNumber: carNum,
       fastestLapMs: null,
       currentLap: 0,
       lastLapStamp: null
