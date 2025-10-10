@@ -24,10 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!ok) { showError('Wrong key!'); return; }
     clearError();
 
-    // make sure the UI becomes visible
     document.getElementById('app').style.display = 'block';
 
-    // Ask for initial sessions snapshot (in case nobody is changing sessions yet)
+    // Ask for initial sessions snapshot 
     socket.emit('get-sessions');
   });
 
