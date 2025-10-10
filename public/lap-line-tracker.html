@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Lap Line Tracker</title>
+  <link rel="stylesheet" href="/css/lap-line-tracker.css">
+</head>
+<body>
+
+  <header>
+    <h1>Lap Line Tracker</h1>
+  </header>
+
+  <!-- Race info panel: read-only mirror of Safety Officer state -->
+  <section class="race-info" id="side-panel">
+    <h3>Race Information</h3>
+    <p><strong>Session:</strong> <span id="sessions">No session selected</span></p>
+    <p><strong>Drivers:</strong> <span id="driver-count">0/8 drivers</span></p>
+    <p><strong>Mode:</strong> <span id="current-race-mode">SAFE</span></p>
+    <p><strong>Duration:</strong> <span id="race-duration">Race not started</span></p>
+  </section>
+
+  <div id="error" aria-live="polite"></div>
+
+    <div id="app" style="display: none;">
+        <h2>Race Sessions</h2>
+        <ul id="sessions-list"></ul>
+    </div>
+
+    <!-- Car buttons get rendered here -->
+    <div id="grid"></div>
+  </div>
+
+  <footer>
+    <button id="logout">Logout</button>
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/lap-line-tracker.js"></script>
+</body>
+</html>
