@@ -146,7 +146,8 @@ function startTimer(duration) {
             timeLeft: timeLeft,
             raceActive: raceActive,
             raceMode: currentRaceMode,
-            sessionId: currentSession?.id
+            sessionId: currentSession?.id,
+            sessionName: currentSession?.name
         });
 
         if (timeLeft <= 0) {
@@ -170,7 +171,8 @@ function stopTimer() {
         timeLeft: 0,
         raceActive: false,
         raceMode: currentRaceMode,
-        sessionId: currentSession?.id
+        sessionId: currentSession?.id,
+        sessionName: currentSession?.name
     });
 
     updateButtonStates();
@@ -255,7 +257,8 @@ function setRaceMode(mode) { //handle mode clicks
         timeLeft: timeLeft,
         raceActive: raceActive,
         raceMode: currentRaceMode,
-        sessionId: currentSession?.id
+        sessionId: currentSession?.id,
+        sessionName: currentSession?.name
     });
     
     console.log('Race mode updated to:', currentRaceMode);
