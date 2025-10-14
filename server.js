@@ -176,4 +176,13 @@ io.on('connection', (socket) => { // socket object for every unique user
     io.emit('timer-update', raceData);
   });
 
+  socket.on('race-mode-change', (raceModeData) => { // re-broadcast race mode changes
+    if (socket.role !== 'safety') { 
+      console.warn('Unauthorized race mode change attempt');
+      return;
+    }
+
+    io.emit('race-mode-change', raceModeData);
+  });
+
 });

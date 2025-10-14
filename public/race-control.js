@@ -45,6 +45,24 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('error').innerText = 'Connection error';
     });
 
+    socket.on('race-mode-change', (raceModeData) => {
+        console.log('Received race mode change:', raceModeData);
+        if (raceModeData.mode) {
+            currentRaceMode = raceModeData.mode.toUpperCase();
+            
+            // Update button visual states
+            document.getElementById('safe-mode-btn').classList.remove('active');
+            document.getElementById('hazard-mode-btn').classList.remove('active');
+            document.getElementById('danger-mode-btn').classList.remove('active');
+            document.getElementById('finish-mode-btn').classList.remove('active');
+            
+            document.getElementById(`${raceModeData.mode}-mode-btn`).classList.add('active');
+            
+            // Update race mode in the info panel
+            document.getElementById('current-race-mode').textContent = currentRaceMode;
+        }
+    });
+
     socket.emit('auth', { role, key });
 
     socket.on('auth-result', (ok) => { // if OK, show race sessions
@@ -244,7 +262,7 @@ function setRaceMode(mode) { //handle mode clicks
 
     document.getElementById(`${mode}-mode-btn`).classList.add('active');
 
-    // socket communication - broadcast to all other interfaces
+    // Send race mode change to server for broadcast to all other interfaces
     socket.emit('race-mode-change', { mode, sessionId: currentSession?.id });
 
     // Update race mode in the info panel
