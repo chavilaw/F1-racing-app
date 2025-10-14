@@ -210,6 +210,29 @@ io.on('connection', (socket) => { // socket object for every unique user
     io.emit('race-mode-change', raceModeData);
   });
 
-  
+  socket.on('delete-session', (data, cb) => { // delete completed race session
+    if (!isAuthorized(socket, 'safety')) { 
+      console.warn('Unauthorized delete session attempt');
+      return cb && cb({ error: 'not authorized' });
+    }
+    
+    if (!data || !data.sessionId) {
+      return cb && cb({ error: 'invalid session data' });
+    }
+
+    const sessionIndex = sessions.findIndex(s => String(s.id) === String(data.sessionId));
+    if (sessionIndex === -1) {
+      return cb && cb({ error: 'session not found' });
+    }
+
+    // Remove the session
+    const deletedSession = sessions.splice(sessionIndex, 1)[0];
+    console.log(`Session deleted: ${deletedSession.name} (ID: ${deletedSession.id})`);
+    
+    // Broadcast updated sessions list to all clients
+    broadcastSessions();
+    
+    cb && cb({ ok: true, deletedSession });
+  });
 
 });

@@ -209,6 +209,18 @@ function timeExpired() {
     alert('Race completed');
 
     socket.emit('race-completed', { sessionId: currentSession?.id});
+    
+    // Delete the completed race session and auto-select next one
+    if (currentSession?.id) {
+        socket.emit('delete-session', { sessionId: currentSession.id }, (response) => {
+            if (response && response.ok) {
+                console.log('Race session deleted:', response.deletedSession.name);
+                // The sessions list will be updated automatically via the 'sessions' event
+            } else {
+                console.error('Failed to delete session:', response?.error);
+            }
+        });
+    }
 }
 
 function updateDisplay() { //refresh screen
@@ -391,6 +403,9 @@ function renderSessions() {
 
     if (!latestSessions || latestSessions.length === 0) {
         sessionsList.innerHTML = '<li>No sessions available</li>';
+        currentSession = null;
+        updateRaceInfoPanel();
+        updateDriverBriefing();
         return;
     }
 
@@ -400,8 +415,18 @@ function renderSessions() {
         sessionsList.appendChild(li);
     });
 
+    // Auto-select next session if current session was deleted or no session selected
     if (latestSessions.length > 0) {
-        currentSession = latestSessions[0];
+        const currentSessionStillExists = currentSession && 
+            latestSessions.some(s => String(s.id) === String(currentSession.id));
+        
+        if (!currentSessionStillExists) {
+            // Current session was deleted, select the first available session
+            currentSession = latestSessions[0];
+            console.log('Auto-selected next session:', currentSession.name);
+        }
+    } else {
+        currentSession = null;
     }
 
     updateRaceInfoPanel();
