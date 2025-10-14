@@ -1,7 +1,8 @@
 let socket;
 let latestSessions;
+let mode;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const key = sessionStorage.getItem('racetrack_key');
     const role = localStorage.getItem('racetrack_role');
 
@@ -16,6 +17,16 @@ document.addEventListener('DOMContentLoaded', function() {
     socket.on('sessions', (sessions) => {
         latestSessions = Array.isArray(sessions) ? sessions : [];
         renderSessions();
+    });
+
+    socket.on('connect', () => {
+        socket.emit('request-race-data');
+    });
+
+    socket.on('timer-update', (payload) => {
+        // payload: { timeLeft, raceActive, raceMode, sessionId }
+        console.log('timer-update received', payload);
+        mode = payload.raceMode;
     });
 
     socket.on('connection-error', (err) => {
@@ -46,6 +57,19 @@ function addSession() {
     socket.emit('add-session', payload, (res) => {
         if (res && res.error) alert('Error creating session: ' + res.error);
     });
+}
+
+function deleteSession(sessionId) {
+  if (!socket || socket.disconnected) { alert('Not connected. Log in first.'); return; }
+  if (!confirm('Delete session ' + sessionId + '? This cannot be undone.')) return;
+
+  socket.emit('delete-session', { sessionId }, (res) => {
+    if (res && res.error) {
+      alert('Could not delete session: ' + res.error);
+    } else {
+      console.log('Deleted', sessionId);
+    }
+  });
 }
 
 function addDriverToSession(sessionId) {
@@ -89,7 +113,7 @@ function editDriver(sessionId, oldName, currentCar) {
 function removeDriverFromSession(sessionId, driverName) {
     if (!socket || socket.disconnected) { alert('Not connected. Log in first.'); return; }
     if (!confirm(`Remove driver ${driverName}?`)) return;
-    socket.emit('remove-driver', {sessionId, name: driverName }, (res) => {
+    socket.emit('remove-driver', { sessionId, name: driverName }, (res) => {
         if (res && res.error) alert('Could not remove driver: ' + res.error);
     });
 }
@@ -103,11 +127,12 @@ function renderSessions() {
         return;
     }
 
-    latestSessions.forEach(s => {
+    latestSessions.forEach((s, index) => {
+        if (mode === "SAFE" && index === 0) return;
         const li = document.createElement('li');
 
         const header = document.createElement('div');
-        header.innerHTML = `<strong>ID: ${s.id}</strong> | Name: ${s.name} |&nbsp;<small>(${(s.drivers||[]).length}/8 drivers)</small>`;
+        header.innerHTML = `<strong>ID: ${s.id}</strong> | Name: ${s.name} |&nbsp;<small>(${(s.drivers || []).length}/8 drivers)</small>`;
         li.appendChild(header);
 
         const addBtn = document.createElement('button');
@@ -120,6 +145,12 @@ function renderSessions() {
             addBtn.onclick = () => addDriverToSession(s.id);
         }
         li.appendChild(addBtn);
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.style.margin = '6px';
+        delBtn.onclick = () => deleteSession(s.id);
+        li.appendChild(delBtn);
 
         const dl = document.createElement('ul');
         (s.drivers || []).forEach(d => {

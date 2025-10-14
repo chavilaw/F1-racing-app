@@ -46,8 +46,14 @@ function getAvailableCarNumber(session) {
   return null;
 }
 
+let StoredRaceData = null;
+
 io.on('connection', (socket) => { // socket object for every unique user
   console.log('Client connected');
+  socket.emit('sessions', sessions);
+  socket.on('request-race-data', () => {
+    socket.emit('timer-update', StoredRaceData);
+  });
   // socket.on === listen // socket.emit === send
 
   socket.on('auth', ({ role, key }) => { // check keys and role
@@ -80,6 +86,23 @@ io.on('connection', (socket) => { // socket object for every unique user
     cb && cb({ ok: true, session: newSession });
   });
 
+  socket.on('delete-session', (payload, cb) => {
+  if (!isAuthorized(socket, 'receptionist')) return cb && cb({ error: 'not authorized' });
+  if (!payload || !payload.sessionId) return cb && cb({ error: 'invalid payload' });
+
+  const idx = sessions.findIndex(s => String(s.id) === String(payload.sessionId));
+  if (idx === -1) return cb && cb({ error: 'session not found' });
+
+  // OPTIONAL SAFETY CHECK:
+  // if (raceState && String(raceState.sessionId) === String(payload.sessionId)) {
+  //   return cb && cb({ error: 'cannot delete session while race is active' });
+  // }
+
+  // Remove the session
+  sessions.splice(idx, 1);
+  broadcastSessions();
+  cb && cb({ ok: true });
+});
 
   socket.on('add-driver', (payload, cb) => {
     if (!isAuthorized(socket, 'receptionist')) return cb && cb({ error: 'not authorized' });
@@ -168,10 +191,12 @@ io.on('connection', (socket) => { // socket object for every unique user
     cb && cb({ ok: true });
   });
 
-  socket.on('timer-update', (raceData) => { // re-broadcast timer
+  socket.on('timer-update', (raceData) => { // re-broadcast race data
     if (socket.role !== 'safety') { 
       console.warn('Unauthorized timer update attempt');
     }
+
+    StoredRaceData = raceData;
 
     io.emit('timer-update', raceData);
   });
@@ -184,5 +209,7 @@ io.on('connection', (socket) => { // socket object for every unique user
 
     io.emit('race-mode-change', raceModeData);
   });
+
+  
 
 });
