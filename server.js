@@ -87,22 +87,27 @@ io.on('connection', (socket) => { // socket object for every unique user
   });
 
   socket.on('delete-session', (payload, cb) => {
-  if (!isAuthorized(socket, 'receptionist')) return cb && cb({ error: 'not authorized' });
-  if (!payload || !payload.sessionId) return cb && cb({ error: 'invalid payload' });
+    // Allow both receptionist and safety officer to delete sessions
+    if (!isAuthorized(socket, 'receptionist') && !isAuthorized(socket, 'safety')) {
+      return cb && cb({ error: 'not authorized' });
+    }
+    
+    if (!payload || !payload.sessionId) return cb && cb({ error: 'invalid payload' });
 
-  const idx = sessions.findIndex(s => String(s.id) === String(payload.sessionId));
-  if (idx === -1) return cb && cb({ error: 'session not found' });
+    const idx = sessions.findIndex(s => String(s.id) === String(payload.sessionId));
+    if (idx === -1) return cb && cb({ error: 'session not found' });
 
-  // OPTIONAL SAFETY CHECK:
-  // if (raceState && String(raceState.sessionId) === String(payload.sessionId)) {
-  //   return cb && cb({ error: 'cannot delete session while race is active' });
-  // }
+    // OPTIONAL SAFETY CHECK:
+    // if (raceState && String(raceState.sessionId) === String(payload.sessionId)) {
+    //   return cb && cb({ error: 'cannot delete session while race is active' });
+    // }
 
-  // Remove the session
-  sessions.splice(idx, 1);
-  broadcastSessions();
-  cb && cb({ ok: true });
-});
+    // Remove the session
+    const deleted = sessions.splice(idx, 1)[0];
+    console.log(`Session deleted by ${socket.role}: ${deleted.name} (ID: ${deleted.id})`);
+    broadcastSessions();
+    cb && cb({ ok: true, deleted });
+  });
 
   socket.on('add-driver', (payload, cb) => {
     if (!isAuthorized(socket, 'receptionist')) return cb && cb({ error: 'not authorized' });
@@ -210,29 +215,5 @@ io.on('connection', (socket) => { // socket object for every unique user
     io.emit('race-mode-change', raceModeData);
   });
 
-  socket.on('delete-session', (data, cb) => { // delete completed race session
-    if (!isAuthorized(socket, 'safety')) { 
-      console.warn('Unauthorized delete session attempt');
-      return cb && cb({ error: 'not authorized' });
-    }
-    
-    if (!data || !data.sessionId) {
-      return cb && cb({ error: 'invalid session data' });
-    }
-
-    const sessionIndex = sessions.findIndex(s => String(s.id) === String(data.sessionId));
-    if (sessionIndex === -1) {
-      return cb && cb({ error: 'session not found' });
-    }
-
-    // Remove the session
-    const deletedSession = sessions.splice(sessionIndex, 1)[0];
-    console.log(`Session deleted: ${deletedSession.name} (ID: ${deletedSession.id})`);
-    
-    // Broadcast updated sessions list to all clients
-    broadcastSessions();
-    
-    cb && cb({ ok: true, deletedSession });
-  });
 
 });
