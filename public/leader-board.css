@@ -1,0 +1,152 @@
+/* Leaderboard */
+
+/* Base layout */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f0f0f0;
+  color: #222;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+header h1 {
+  color: #333;
+  margin: 0;
+}
+
+/* Cards */
+#info-card,
+#board-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: 20px 0;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#info-card h3,
+#board-card h3 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+/* Timer */
+.timer {
+  text-align: center;
+  margin: 20px 0 10px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+#timer-text {
+  font-size: 56px;          
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0;
+  font-family: "Courier New", monospace;
+}
+
+#timer-status {
+  font-size: 18px;
+  color: #7f8c8d;
+  margin-top: 8px;
+}
+
+/* Flag indicator */
+.flag {
+  margin-top: 12px;
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #ecf0f1;
+}
+
+#flag-text {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+/* Leaderboard table */
+table#leaderboard {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#leaderboard thead th {
+  text-align: left;
+  padding: 12px;
+  background: #ecf0f1;
+  color: #2c3e50;
+  font-weight: 700;
+  border-bottom: 1px solid #d7dde2;
+}
+
+#leaderboard tbody td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+#leaderboard tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+#leaderboard tbody tr:hover {
+  background: #eef6ff;
+}
+
+/* Best lap styling */
+.time-good {
+  color: #27ae60;
+  font-weight: bold;
+}
+.time-na {
+  color: #95a5a6;
+}
+
+/* Post-session note */
+#post-session-note {
+  margin-top: 12px;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* Optional: basic responsiveness */
+@media (max-width: 640px) {
+  #timer-text { font-size: 44px; }
+  #leaderboard thead { display: none; }
+  #leaderboard tbody td {
+    display: block;
+    padding: 8px 12px;
+    border-bottom: none;
+  }
+  #leaderboard tbody tr {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  #leaderboard tbody td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+}

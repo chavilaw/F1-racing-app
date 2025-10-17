@@ -2,55 +2,44 @@ let socket;
 let latestSessions = []; 
 let currentSessionId = sessionStorage.getItem('lapline_session_id') || null; 
 
-// functionality from the safety officer
 let raceActive = false;
 let currentRaceMode = 'SAFE';
 let raceStartTime = null;
 let currentSession = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1) auth info from login.html
+  // auth from login.html
   const key  = sessionStorage.getItem('racetrack_key');
   let role   = localStorage.getItem('racetrack_role');
 
   if (!key) { window.location.href = '/login.html'; return; }
   if (role !== 'observer') { role = 'observer'; localStorage.setItem('racetrack_role', 'observer'); }
 
-  // 2) connect + auth
+  // single socket
   socket = io();
   socket.emit('auth', { role, key });
 
   socket.on('auth-result', (ok) => {
     if (!ok) { showError('Wrong key!'); return; }
     clearError();
-
     document.getElementById('app').style.display = 'block';
-
-    // Ask for initial sessions snapshot 
-    socket.emit('get-sessions');
+    // server will emit 'sessions' on auth ok (per your server code)
   });
 
   socket.on('connect_error', () => showError('Connection error'));
 
-  // 3) sessions broadcast
+  // sessions list (comes from server on auth and after receptionist changes)
   socket.on('sessions', (sessions) => {
     latestSessions = Array.isArray(sessions) ? sessions : [];
 
-    // choose session (prefer one with drivers)
+    // pick current session (keep existing if present; else prefer one with drivers; else first)
     if (!currentSessionId || !latestSessions.some(s => String(s.id) === String(currentSessionId))) {
       const withDrivers = latestSessions.find(s => (s.drivers || []).length > 0);
-      currentSessionId = (withDrivers || latestSessions[0] || {}).id || null;
+      currentSessionId = (withDrivers || latestSessions[0] || {})?.id || null;
       if (currentSessionId) sessionStorage.setItem('lapline_session_id', String(currentSessionId));
     }
 
-    // keep a handy pointer to current session for the info panel
     currentSession = latestSessions.find(s => String(s.id) === String(currentSessionId)) || null;
-
-    // join the session room and get current race state snapshot
-    if (currentSessionId) {
-      socket.emit('join-session', { sessionId: currentSessionId });     // server optional, but recommended
-      socket.emit('get-race-state', { sessionId: currentSessionId });   // server should reply with 'race-state'
-    }
 
     updateRaceInfoPanel();
     renderSessionsDropdown();
@@ -58,73 +47,51 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeLogout();
   });
 
-  // 4) click to emit lap (gated by race state)
+  // SAFETY TIMER BROADCAST — this is the only race-state feed your server relays
+  socket.on('timer-update', (payload) => {
+    // payload: { timeLeft, raceActive, raceMode, sessionId }
+    if (!matchesSession(payload.sessionId)) return;
+
+    raceActive = !!payload.raceActive;
+    currentRaceMode = String(payload.raceMode || 'SAFE').toUpperCase();
+
+    // optional: synthesize a startTime so your elapsed display moves
+    if (raceActive && payload.timeLeft != null) {
+      // treat start as "now - remaining to end of session" only to tick UI
+      // if you don’t want this, remove lines below and just show LIVE/--:--
+      raceStartTime = raceStartTime || Date.now();
+    } else if (!raceActive) {
+      raceStartTime = null;
+    }
+
+    updateRaceInfoPanel();
+    updateGridEnabled();
+  });
+
+  // click to emit lap
   document.getElementById('grid').addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-car]');
     if (!btn) return;
     const carNumber = Number(btn.dataset.car);
     if (!carNumber) return;
 
-    // Only allow laps if the race is running and mode is allowed
-    if (!isLapAllowed()) {
-      return;
-    }
-
+    if (!isLapAllowed()) return;
     socket.emit('lap:crossed', { carNumber, sessionId: currentSessionId });
   });
 
-  // subscribe to safety officer for race state updates
-  socket.on('race-state', ({ sessionId, active, mode, startTime }) => {
-    if (!matchesSession(sessionId)) return;
-    raceActive = !!active;
-    currentRaceMode = String(mode || 'SAFE').toUpperCase();
-    raceStartTime = startTime || null;
-    updateRaceInfoPanel();
-    updateGridEnabled();
-  });
-
-  socket.on('race-mode-change', ({ mode, sessionId }) => {
-    if (!matchesSession(sessionId)) return;
-    currentRaceMode = String(mode || 'SAFE').toUpperCase();
-    updateRaceInfoPanel();
-    updateGridEnabled();
-  });
-
-  socket.on('race-started', ({ sessionId, startTime }) => {
-    if (!matchesSession(sessionId)) return;
-    raceActive = true;
-    raceStartTime = startTime || Date.now();
-    updateRaceInfoPanel();
-    updateGridEnabled();
-  });
-
-  socket.on('race-stopped', ({ sessionId }) => {
-    if (!matchesSession(sessionId)) return;
-    raceActive = false;
-    updateRaceInfoPanel();
-    updateGridEnabled();
-  });
-
-  socket.on('race-completed', ({ sessionId }) => {
-    if (!matchesSession(sessionId)) return;
-    raceActive = false;
-    updateRaceInfoPanel();
-    updateGridEnabled();
-  });
-
-  // ----- helpers -----
-
-  // basically just the info panel same as safety officer but read only
+  // ---- helpers ----
   function updateRaceInfoPanel() {
     document.getElementById('sessions').textContent =
-      currentSession?.name || 'No session selected';
+      currentSession ? (currentSession.name || '—') : 'No session selected';
     document.getElementById('driver-count').textContent =
       `${(currentSession?.drivers || []).length}/8 drivers`;
     document.getElementById('current-race-mode').textContent = currentRaceMode;
 
-    if (raceActive && raceStartTime) {
-      const elapsed = Math.floor((Date.now() - raceStartTime) / 1000);
-      document.getElementById('race-duration').textContent = `${elapsed} seconds elapsed`;
+    // simple status text; you can replace with a countdown if server sends one to this page
+    if (raceActive) {
+      document.getElementById('race-duration').textContent = 'Race in progress';
+    } else if (currentRaceMode === 'FINISH') {
+      document.getElementById('race-duration').textContent = 'Finish flag — laps may still count';
     } else {
       document.getElementById('race-duration').textContent = 'Race not started';
     }
@@ -152,13 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sessionStorage.setItem('lapline_session_id', String(currentSessionId));
       currentSession = latestSessions.find(s => String(s.id) === String(currentSessionId)) || null;
 
-      // rejoin room + refresh state for the new session
-      if (currentSessionId) {
-        socket.emit('join-session', { sessionId: currentSessionId });
-        socket.emit('get-race-state', { sessionId: currentSessionId });
-      }
-
-      // pessimistically disable until state arrives
+      // reset local race flags until next timer-update arrives
       raceActive = false;
       currentRaceMode = 'SAFE';
       raceStartTime = null;
@@ -190,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.appendChild(btn);
       });
 
-    // Reflect current safety gating
     updateGridEnabled();
   }
 
@@ -200,27 +160,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function isLapAllowed() {
-    // Policy: allow laps only while race is active AND mode is SAFE or HAZARD
-    return raceActive && (currentRaceMode === 'SAFE' || currentRaceMode === 'HAZARD');
+    // Allow during RUNNING and FINISH (spec: laps can still cross in finish)
+    return (raceActive || currentRaceMode === 'FINISH');
   }
 
   function matchesSession(sessionId) {
     return !sessionId || String(sessionId) === String(currentSessionId);
   }
 
-  function showError(msg){
-    document.getElementById('error').textContent = msg;
-  }
-  function clearError(){
-    document.getElementById('error').textContent = '';
-  }
+  function showError(msg){ document.getElementById('error').textContent = msg; }
+  function clearError(){ document.getElementById('error').textContent = ''; }
 });
 
 function initializeLogout() {
-  document.getElementById('logout').addEventListener('click', () => { 
+  const btn = document.getElementById('logout');
+  if (!btn) return;
+  btn.addEventListener('click', () => { 
     sessionStorage.removeItem('racetrack_key');
     localStorage.removeItem('racetrack_role');
-    socket.disconnect();
+    if (socket) socket.disconnect();
     window.location.href = '/login.html';
   });
 }
