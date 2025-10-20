@@ -1,13 +1,10 @@
 let socket;
 let currentSession = null;
-let sessionEndAtMs = null;
-let timerInterval = null;
-let serverTimerActive = false; // becomes true once we receive timer-update for the current session
 
 const state = {
-  bestLapMs: new Map(),     // driverId -> best lap (ms)
-  currentLapNum: new Map(), // driverId -> current lap
-  drivers: new Map(),       // driverId -> { id, name, carNumber }
+  bestLapMs: new Map(),     // key = String(carNumber)
+  currentLapNum: new Map(), // key = String(carNumber)
+  drivers: new Map(),       // key -> { id, name, carNumber }
   order: [],
   sessionEnded: false
 };
@@ -28,33 +25,43 @@ document.addEventListener('DOMContentLoaded', () => {
 function initSocket() {
   socket = io();
 
+  // get initial timer/flag state immediately
   socket.on('connect', () => {
-    // Ask server to send the current session snapshot
-    socket.emit('leaderboard:get-current-session');
+    socket.emit('request-race-data');
   });
 
-  // Required events only:
-  socket.on('session:current', initSession);
-  socket.on('session:start',  initSession);
-  socket.on('session:end',    endSessionUI);
-  socket.on('lap:recorded',   onLapRecorded);
-  socket.on('session:flag',   ({ flag }) => updateFlag(flag));
+  // Server always emits sessions on connect; also on receptionist edits
+  socket.on('sessions', (sessions) => {
+    if (!Array.isArray(sessions) || sessions.length === 0) return;
 
-  
-  socket.on('timer-update', (payload) => {
-    
-    if (currentSession && payload.sessionId && payload.sessionId !== currentSession.id) return;
+    // pick: keep current if present; else one with drivers; else first
+    const picked =
+      (currentSession && sessions.find(s => String(s.id) === String(currentSession.id))) ||
+      sessions.find(s => (s.drivers || []).length > 0) ||
+      sessions[0];
 
+    if (!picked) return;
+
+    if (!currentSession || String(picked.id) !== String(currentSession.id)) {
+      initSession(picked);
+    } else {
+      // same session; refresh snapshot
+      hydrateFromSnapshot(picked);
+      renderTable();
+    }
+  });
+
+  // lap updates
+  socket.on('lap:recorded', onLapRecorded);
+
+  // flags + timer (server-driven)
+  socket.on('timer-update', (payload = {}) => {
+    if (currentSession && payload.sessionId && String(payload.sessionId) !== String(currentSession.id)) return;
 
     if (payload.sessionName) elSessionName.textContent = payload.sessionName;
 
-    // apply visuals + timer
     applyRaceModeVisuals(payload.raceMode);
     setTimerFromPayload(payload);
-
-    // once we start receiving server ticks for this session, stop local timer
-    serverTimerActive = true;
-    clearInterval(timerInterval);
   });
 }
 
@@ -62,7 +69,6 @@ function initSession(session) {
   currentSession = session;
   state.sessionEnded = false;
   elPostNote.hidden = true;
-
   elSessionName.textContent = session.name || 'Current Session';
 
   // reset state
@@ -71,120 +77,87 @@ function initSession(session) {
   state.drivers.clear();
   state.order = [];
 
-  // drivers
-  const drivers = session.drivers || [];
-  for (const d of drivers) {
-    const driverId = d.id ?? d.driverId ?? `${d.carNumber}`;
-    state.drivers.set(driverId, {
-      id: driverId,
-      name: d.name || d.driverName || `Driver ${d.carNumber ?? ''}`,
-      carNumber: d.carNumber ?? d.number ?? '?'
-    });
-    state.bestLapMs.set(driverId, undefined);
-    state.currentLapNum.set(driverId, 0);
-  }
+  hydrateFromSnapshot(session);
 
-  // reset server timer flag for a fresh session
-  serverTimerActive = false;
-
-  // timer target (fallback if we don't get timer-update)
-  sessionEndAtMs = null;
-  if (session.endsAt) {
-    sessionEndAtMs = new Date(session.endsAt).getTime();
-  } else if (session.remainingMs) {
-    sessionEndAtMs = Date.now() + session.remainingMs;
-  } else if (session.durationMs && session.startedAt) {
-    sessionEndAtMs = new Date(session.startedAt).getTime() + session.durationMs;
-  }
-  startTimerLoop(); // will be cancelled automatically when timer-update arrives
-
-  // initial render
   renderTable();
-  elTimerStatus.textContent = 'LIVE';
-
-  // initial flag if provided
+  elTimerStatus.textContent = '—'; // wait for server ticks
   if (session.flag) updateFlag(session.flag);
 }
 
-function onLapRecorded({ sessionId, driverId, lapNumber, lapTimeMs }) {
-  if (!currentSession) return;
-  if (sessionId && currentSession.id && sessionId !== currentSession.id) return;
+// apply driver snapshot into state
+function hydrateFromSnapshot(session) {
+  const drivers = session.drivers || [];
+  for (const d of drivers) {
+    const key = String(d.carNumber);
+    if (!key) continue;
 
-  if (!state.drivers.has(driverId)) {
-    // late-added driver fallback (minimal)
-    state.drivers.set(driverId, { id: driverId, name: `Driver ${driverId}`, carNumber: '?' });
-    state.bestLapMs.set(driverId, undefined);
-    state.currentLapNum.set(driverId, 0);
+    state.drivers.set(key, {
+      id: key,
+      name: d.name || `Driver ${d.carNumber ?? ''}`,
+      carNumber: d.carNumber ?? '?'
+    });
+
+    if (typeof d.currentLap === 'number') {
+      state.currentLapNum.set(key, d.currentLap);
+    } else if (!state.currentLapNum.has(key)) {
+      state.currentLapNum.set(key, 0);
+    }
+
+    if (typeof d.fastestLapMs === 'number' && d.fastestLapMs > 0) {
+      const prev = state.bestLapMs.get(key);
+      if (prev == null || d.fastestLapMs < prev) {
+        state.bestLapMs.set(key, d.fastestLapMs);
+      }
+    } else if (!state.bestLapMs.has(key)) {
+      state.bestLapMs.set(key, undefined);
+    }
+  }
+}
+
+function onLapRecorded({ sessionId, driverId, lapNumber, lapTimeMs, carNumber }) {
+  if (!currentSession) return;
+  if (sessionId && String(sessionId) !== String(currentSession.id)) return;
+
+  const key = String(carNumber ?? driverId);
+  if (!state.drivers.has(key)) {
+    state.drivers.set(key, { id: key, name: `Driver ${carNumber ?? driverId}`, carNumber: carNumber ?? '?' });
+    state.bestLapMs.set(key, undefined);
+    state.currentLapNum.set(key, 0);
   }
 
-  const prevLap = state.currentLapNum.get(driverId) ?? 0;
-  state.currentLapNum.set(
-    driverId,
-    Math.max(prevLap, typeof lapNumber === 'number' ? lapNumber : prevLap + 1)
-  );
+  const prevLap = state.currentLapNum.get(key) ?? 0;
+  state.currentLapNum.set(key, Math.max(prevLap, typeof lapNumber === 'number' ? lapNumber : prevLap + 1));
 
   if (typeof lapTimeMs === 'number' && lapTimeMs > 0) {
-    const prevBest = state.bestLapMs.get(driverId);
-    if (prevBest === undefined || lapTimeMs < prevBest) {
-      state.bestLapMs.set(driverId, lapTimeMs);
+    const prevBest = state.bestLapMs.get(key);
+    if (prevBest == null || lapTimeMs < prevBest) {
+      state.bestLapMs.set(key, lapTimeMs);
     }
   }
 
   renderTable();
 }
 
-function startTimerLoop() {
-  clearInterval(timerInterval);
-
-  // If the server is driving via timer-update, don't run the local loop
-  if (serverTimerActive) return;
-
-  if (!sessionEndAtMs) {
-    elTimerText.textContent = '--:--';
-    elTimerStatus.textContent = 'LIVE';
-    return;
-  }
-
-  const tick = () => {
-    if (serverTimerActive) { // stop if server takes over mid-session
-      clearInterval(timerInterval);
-      return;
-    }
-    let remaining = sessionEndAtMs - Date.now();
-    if (remaining <= 0) {
-      remaining = 0;
-      clearInterval(timerInterval);
-      endSessionUI();
-    }
-    elTimerText.textContent = fmtClock(remaining);
-    if (!state.sessionEnded) elTimerStatus.textContent = 'LIVE';
-  };
-
-  tick();
-  timerInterval = setInterval(tick, 200);
-}
-
 function endSessionUI() {
+  if (state.sessionEnded) return;
   state.sessionEnded = true;
   elTimerStatus.textContent = 'ENDED';
   elPostNote.hidden = false;
-  // Keep table as-is until next session
 }
 
 function renderTable() {
   const rows = [];
 
-  for (const [driverId, meta] of state.drivers.entries()) {
+  for (const [key, meta] of state.drivers.entries()) {
     rows.push({
-      driverId,
+      key,
       carNumber: meta.carNumber,
       name: meta.name,
-      bestLapMs: state.bestLapMs.get(driverId),
-      currentLap: state.currentLapNum.get(driverId) ?? 0
+      bestLapMs: state.bestLapMs.get(key),
+      currentLap: state.currentLapNum.get(key) ?? 0
     });
   }
 
-  // sort fastest first; no time => bottom
   rows.sort((a, b) => {
     const aa = a.bestLapMs, bb = b.bestLapMs;
     if (aa == null && bb == null) return 0;
@@ -193,7 +166,7 @@ function renderTable() {
     return aa - bb;
   });
 
-  state.order = rows.map(r => r.driverId);
+  state.order = rows.map(r => r.key);
 
   elTbody.innerHTML = '';
   let pos = 1;
@@ -230,12 +203,14 @@ function renderTable() {
   }
 }
 
-// === racemode visuals=====
+// === race-mode visuals =====
 function applyRaceModeVisuals(raceMode) {
-  // Normalize to UPPER
   const m = String(raceMode || '').toUpperCase();
 
-  // Map race mode -> your flag system
+  // optional small label
+  const modeEl = document.getElementById('mode');
+  if (modeEl) modeEl.textContent = m;
+
   const modeToFlag = {
     SAFE:    'GREEN',
     HAZARD:  'YELLOW',
@@ -244,10 +219,8 @@ function applyRaceModeVisuals(raceMode) {
   };
   const flag = modeToFlag[m] || '';
 
-  // Update your flag badge/text
   if (flag) updateFlag(flag);
 
-  // Set page background similar to teammate's implementation
   const root = document.documentElement;
   root.style.backgroundImage = '';
   root.style.backgroundColor = '';
@@ -264,17 +237,23 @@ function applyRaceModeVisuals(raceMode) {
 }
 
 function setTimerFromPayload(payload) {
-  // Safety emits timeLeft in seconds; fmtClock expects ms
   if (typeof payload.timeLeft === 'number') {
     elTimerText.textContent = fmtClock(Math.max(0, payload.timeLeft) * 1000);
+  } else {
+    elTimerText.textContent = '--:--';
   }
-  // status label
-  if (String(payload.raceMode || '').toUpperCase() === 'FINISH') {
+
+  const mode = String(payload.raceMode || '').toUpperCase();
+  if (mode === 'FINISH') {
     elTimerStatus.textContent = 'FINISH';
+    endSessionUI();
   } else if (payload.raceActive) {
     elTimerStatus.textContent = 'LIVE';
-  } else {
+  } else if (payload.timeLeft === 0) {
     elTimerStatus.textContent = 'ENDED';
+    endSessionUI();
+  } else {
+    elTimerStatus.textContent = '—';
   }
 }
 
@@ -305,7 +284,7 @@ function updateFlag(flagRaw) {
   elFlagText.textContent = label;
 }
 
-// ===== the clock  =====
+// ===== time formatters =====
 function fmtClock(ms) {
   const totalSec = Math.floor(ms / 1000);
   const m = Math.floor(totalSec / 60);

@@ -68,15 +68,24 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGridEnabled();
   });
 
-  // click to emit lap
+  // click to emit lap and get the time when crossed
   document.getElementById('grid').addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-car]');
-    if (!btn) return;
-    const carNumber = Number(btn.dataset.car);
-    if (!carNumber) return;
+  const btn = e.target.closest('button[data-car]');
+  if (!btn) return;
 
-    if (!isLapAllowed()) return;
-    socket.emit('lap:crossed', { carNumber, sessionId: currentSessionId });
+  const carNumber = Number(btn.dataset.car);
+  if (!Number.isFinite(carNumber)) return;
+  if (!isLapAllowed()) return;
+
+  // client-side timestamp 
+  const crossedAt = Date.now();
+
+  socket.emit('lap:crossed', {
+    sessionId: currentSessionId,
+    carNumber,
+    crossedAt   // optional; server will still use its own clock
+  });
+
   });
 
   // ---- helpers ----

@@ -215,5 +215,63 @@ io.on('connection', (socket) => { // socket object for every unique user
     io.emit('race-mode-change', raceModeData);
   });
 
+  socket.on('lap:crossed', (payload) => {
+  // allow from observer (and optionally safety)
+  if (socket.role !== 'observer' && socket.role !== 'safety') {
+    console.warn('Unauthorized lap crossed attempt');
+    return;
+  }
+  if (!payload || payload.sessionId == null || payload.carNumber == null) return;
 
-});
+  const s = getSession(payload.sessionId);
+  if (!s) return;
+
+  const carNum = Number(payload.carNumber);
+  if (!Number.isFinite(carNum)) return;
+
+  const d = (s.drivers || []).find(x => Number(x.carNumber) === carNum);
+  if (!d) return;
+
+  // --- timing (server is source of truth) ---
+  const serverNow = Date.now();
+  const clientNow = Number(payload.crossedAt);
+  if (Number.isFinite(clientNow) && Math.abs(clientNow - serverNow) > 1500) {
+    console.warn(`Lap timestamp drift for car ${carNum}: client ${clientNow - serverNow}ms`);
+  }
+
+  const prevStamp = d.lastLapStamp;   // may be null on first lap
+  d.lastLapStamp = serverNow;
+
+  const prevLap = Number(d.currentLap) || 0;
+  const nextLap = prevLap + 1;
+  d.currentLap = nextLap;
+
+  let lapTimeMs = null;
+  if (Number.isFinite(prevStamp)) {
+    lapTimeMs = serverNow - prevStamp;
+    if (lapTimeMs <= 0 || !Number.isFinite(lapTimeMs)) lapTimeMs = null;
+  }
+
+  // update fastest
+  if (lapTimeMs != null) {
+    if (d.fastestLapMs == null || lapTimeMs < d.fastestLapMs) {
+      d.fastestLapMs = lapTimeMs;
+    }
+  }
+
+  // refresh snapshot for everyone (Reception, Lapline, Leaderboard, etc.)
+  broadcastSessions();
+
+  // targeted event leaderboards listen to
+  io.emit('lap:recorded', {
+    sessionId: s.id,
+    driverId: String(d.carNumber),   // canonical client key = String(carNumber)
+    carNumber: d.carNumber,
+    lapNumber: nextLap,
+    lapTimeMs: lapTimeMs ?? undefined,
+    crossedAt: serverNow
+  });
+
+  });
+
+}); 
