@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Lap Line Tracker</title>
+  <link rel="stylesheet" href="shared.css">
   <link rel="stylesheet" href="lap-line-tracker.css">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
@@ -43,8 +44,14 @@
     <button id="logout" type="button">Logout</button>
   </div>
 
+  <!-- Fullscreen button -->
+  <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
+    <img src="/img/full_screen.svg" alt="Fullscreen" />
+  </button>
+
   <!-- Socket.IO + page script -->
   <script src="/socket.io/socket.io.js"></script>
+  <script src="fullscreen.js"></script>
   <script src="/lap-line-tracker.js"></script>
 </body>
 </html>

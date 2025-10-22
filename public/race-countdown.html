@@ -2,52 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Race Countdown</title>
     <link rel="stylesheet" href="race-countdown.css">
-    
-    <!--
-      RACE COUNTDOWN (HTML OUTLINE)
-      ======================================
-      TODOs:
-      - Add viewport/meta for kiosk/fullscreen usage
-      - Preload a large 7-seg or mono font for timer
-      - Optional manifest/favicon for kiosk setups
-    -->
 </head>
 <body>
-    <!--
-      MAIN DISPLAY
-      --------------------------------------
-      - Title: "Race Countdown" (top heading)
-      - Timer: big MM:SS in center, show "--:--" when idle
-      - Sublabel: "Time Remaining" under timer
-      - Status banner: "Waiting for race to start" | "Race finished"
-    -->
-    <div>
+    <div class="countdown-container">
         <!-- Title heading -->
-        <h1>Race Countdown</h1>
+        <h1 class="countdown-title">Race Countdown</h1>
         
         <!-- Big countdown timer (MM:SS) -->
-        <p id="timer">--:--</p>
-        
-        <!-- Sublabel under timer -->
-        <p id="timerSub">Time Remaining</p>
+        <div id="timer" class="timer-display">--:--</div>
         
         <!-- Status banner at bottom -->
-        <p id="statusBanner">Waiting for race to start</p>
+        <div id="statusBanner" class="status-banner"></div>
     </div>
 
-    <!--
-      FULLSCREEN CONTROLS
-      --------------------------------------
-      - Enter fullscreen button (PNG icon)
-      - Exit fullscreen via Esc key or X icon
-    -->
-    <!-- <img id="fullscreenBtn" src="/img/fullscreen.png" alt="Fullscreen" /> -->
-    <!-- <img id="closeFullscreenBtn" src="/img/close-x.png" alt="Exit fullscreen" /> -->
+    <!-- Fullscreen button -->
+    <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
+        <img src="/img/full_screen.svg" alt="Fullscreen" />
+    </button>
 
     <!-- Socket.IO and Race Countdown Script -->
     <script src="/socket.io/socket.io.js"></script>
+    <script src="fullscreen.js"></script>
     <script src="race-countdown.js"></script>
 </body>
 </html>

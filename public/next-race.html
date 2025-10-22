@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Race Countdown</title>
+    <link rel="stylesheet" href="shared.css">
     <link rel="stylesheet" href="next-race.css">
 </head>
 <body>
     <div id="SessionName"></div>
 
+    <!-- Fullscreen button -->
+    <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
+        <img src="/img/full_screen.svg" alt="Fullscreen" />
+    </button>
+
     <script src="/socket.io/socket.io.js"></script>
+    <script src="fullscreen.js"></script>
     <script src="next-race.js"></script>
 </body>
 </html>

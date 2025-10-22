@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>Leaderboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="shared.css" />
   <link rel="stylesheet" href="/leader-board.css" />
 </head>
 <body>
@@ -47,7 +48,13 @@
     </p>
   </section>
 
+  <!-- Fullscreen button -->
+  <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
+    <img src="/img/full_screen.svg" alt="Fullscreen" />
+  </button>
+
   <script src="/socket.io/socket.io.js"></script>
+  <script src="fullscreen.js"></script>
   <script src="/leader-board.js"></script>
 </body>
 </html>
