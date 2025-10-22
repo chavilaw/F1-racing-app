@@ -2,9 +2,9 @@ let socket;
 let currentSession = null;
 
 const state = {
-  bestLapMs: new Map(),     // key = String(carNumber)
-  currentLapNum: new Map(), // key = String(carNumber)
-  drivers: new Map(),       // key -> { id, name, carNumber }
+  bestLapMs: new Map(),     
+  currentLapNum: new Map(), 
+  drivers: new Map(),       
   order: [],
   sessionEnded: false
 };
@@ -54,7 +54,7 @@ function initSocket() {
   // lap updates
   socket.on('lap:recorded', onLapRecorded);
 
-  // flags + timer (server-driven)
+  // flags + timer from server
   socket.on('timer-update', (payload = {}) => {
     if (currentSession && payload.sessionId && String(payload.sessionId) !== String(currentSession.id)) return;
 
@@ -203,11 +203,11 @@ function renderTable() {
   }
 }
 
-// === race-mode visuals =====
+// visuals for the mode
 function applyRaceModeVisuals(raceMode) {
   const m = String(raceMode || '').toUpperCase();
 
-  // optional small label
+  //small display
   const modeEl = document.getElementById('mode');
   if (modeEl) modeEl.textContent = m;
 
@@ -257,7 +257,7 @@ function setTimerFromPayload(payload) {
   }
 }
 
-// ===== Flags =====
+// flag display
 function updateFlag(flagRaw) {
   const flag = String(flagRaw || '').toUpperCase();
   elFlag.classList.remove('flag-green','flag-yellow','flag-red','flag-checker','flag-sc');
@@ -284,7 +284,7 @@ function updateFlag(flagRaw) {
   elFlagText.textContent = label;
 }
 
-// ===== time formatters =====
+// time formatters 
 function fmtClock(ms) {
   const totalSec = Math.floor(ms / 1000);
   const m = Math.floor(totalSec / 60);

@@ -6,9 +6,6 @@ socket.on('connect', () => {
 
 socket.on('timer-update', (payload) => {
     // payload: { timeLeft, raceActive, raceMode, sessionId }
-
-    const mode = document.getElementById('mode');
-    mode.textContent = payload.raceMode;
     switch (payload.raceMode) {
         case "SAFE":
             document.documentElement.style.backgroundImage = "";
@@ -28,7 +25,4 @@ socket.on('timer-update', (payload) => {
             document.documentElement.style.backgroundPosition = "center";
             break;
     }
-
-    const sessionName = document.getElementById('session');
-    sessionName.textContent = payload.sessionName;
 });
