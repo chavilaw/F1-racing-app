@@ -1,26 +1,19 @@
-/* 
-A clear visual that the race is finished when it is.
-
-Fullscreen button.
-
-Client-side calculation fallback if server doesn't push every-second timer ticks (uses startTs + durationSec).
-*/
-const socket = io();
-socket.on('timer-update', (payload) => {
-    // payload: { timeLeft, raceActive, raceMode, sessionId }
-    //updateTimerUI(payload);
-    let currentTime = payload.timeLeft;
-    const min = Math.floor(currentTime / 60);
-    const sec = currentTime % 60;
-    const timer = document.getElementById('timer');
-    timer.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-
-    const mode = document.getElementById('mode');
-    mode.textContent = payload.raceMode;
-
-    const sessionName = document.getElementById('session');
-    sessionName.textContent = payload.sessionName;
-});
+// RACE COUNTDOWN (MINIMAL PLAN)
+// =============================
+// Server already broadcasts 'timer-update' and 'race-mode-change' to all clients
+// Just receive updates and display them
+//
+// initializePage(): cache DOM (#timer, #statusBanner, #fullscreenBtn, #closeFullscreenBtn), connect socket, bind clicks
+// connectSocket(): io() create, listen 'timer-update' (server already broadcasts), handle connect/disconnect
+// handleTimerUpdate(payload): updateTimerText(payload.timeLeft), setStatusBanner(...)
+// updateTimerText(timeLeftSec): render "MM:SS" or "--:--" when null/not running
+// setStatusBanner(state): "waiting" | "running" | "finished"
+// formatTime(totalSeconds): return "MM:SS" string
+//
+// toggleFullscreen(): enter/exit fullscreen on documentElement
+// onKeydownEsc(): exit fullscreen on Escape key
+// onFullscreenChange(): show/hide #closeFullscreenBtn when in fullscreen
+// setupFullscreen(): wire #fullscreenBtn click, #closeFullscreenBtn click, keydown listener, fullscreenchange listener
 
 
 
