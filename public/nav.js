@@ -18,17 +18,17 @@ CSS Animation Magic:
 */
 
 function loadNavigation() {
-  // Prevent duplicate navigation if already loaded
+  // Prevent duplicates
   if (document.getElementById('nav_check')) return;
 
-  // Load CSS and HTML from separate files
+
   loadNavCSS();
   loadNavHTML();
   loadFontAwesome();
 }
 
 function loadNavCSS() {
-  // Check if CSS already loaded (prevent duplicates)
+  // Prevent duplicates
   if (document.querySelector('link[href*="nav.css"]')) return;
   
   // Create and inject CSS link
@@ -52,7 +52,7 @@ function loadNavHTML() {
 }
 
 function loadFontAwesome() {
-  // Check if Font Awesome already loaded (prevent duplicates)
+  // Prevent duplicates
   if (document.querySelector('script[src*="fontawesome"]')) return;
   
   // Create and inject Font Awesome JavaScript
