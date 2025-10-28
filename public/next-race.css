@@ -22,7 +22,8 @@
     animation: fadeIn 1.5s ease-in-out, pulse 3s infinite alternate;
 }
 
-li {
+/* Only style li elements within the main content, not navigation */
+#content li {
     list-style: none;
     font-size: 32px;
     background: rgba(255, 255, 255, 0.08);
@@ -34,7 +35,7 @@ li {
     transition: background 0.3s, transform 0.2s;
 }
 
-li:hover {
+#content li:hover {
     background: rgba(255, 255, 255, 0.18);
     transform: scale(1.02);
 }

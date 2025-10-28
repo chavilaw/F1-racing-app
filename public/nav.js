@@ -21,10 +21,10 @@ function loadNavigation() {
   // Prevent duplicates
   if (document.getElementById('nav_check')) return;
 
-
+  // Load everything
+  loadFontAwesome();
   loadNavCSS();
   loadNavHTML();
-  loadFontAwesome();
 }
 
 function loadNavCSS() {
@@ -53,13 +53,13 @@ function loadNavHTML() {
 
 function loadFontAwesome() {
   // Prevent duplicates
-  if (document.querySelector('script[src*="fontawesome"]')) return;
+  if (document.querySelector('link[href*="fontawesome"]')) return;
   
-  // Create and inject Font Awesome JavaScript
-  const script = document.createElement('script');
-  script.src = 'https://kit.fontawesome.com/a076d05399.js';
-  script.crossOrigin = 'anonymous';
-  document.head.appendChild(script);
+  // Use Font Awesome CSS instead of JS kit (more reliable)
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+  document.head.appendChild(link);
 }
 
 // AUTO-LOAD - Run when page is ready
