@@ -45,6 +45,7 @@ function loadNavHTML() {
     .then(html => {
       // Inject HTML into page
       document.body.insertAdjacentHTML('afterbegin', html);
+      console.log('Navigation HTML loaded successfully');
     })
     .catch(error => {
       console.error('Failed to load navigation HTML:', error);

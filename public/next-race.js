@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function renderSession() {
-    document.querySelectorAll('li').forEach(li => li.remove());
+    // Only remove li elements within the content area, not navigation
+    document.querySelectorAll('#content li').forEach(li => li.remove());
     const content = document.getElementById('content');
     const out = document.getElementById('SessionName');
     if (latestSessions.length === 0) {
