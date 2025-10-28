@@ -1,7 +1,147 @@
-#error {
-    color: red;
+/*  General Layout  */
+body {
+    margin: 0;
+    padding: 40px;
+    background: linear-gradient(135deg, #1e1e2f, #2c2c54);
+    color: #fff;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
+/*  Error Message  */
+#error {
+    color: #ff5555;
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+/*  Main Container  */
 #app {
     display: none;
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+}
+
+/*  Header  */
+h2 {
+    text-align: center;
+    margin-top: 0;
+    font-size: 2em;
+    letter-spacing: 1px;
+    color: #f8f8f8;
+}
+
+/*  Session List  */
+#sessions {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+#sessions > li {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 18px;
+    transition: background 0.3s, transform 0.2s;
+}
+
+#sessions > li:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.01);
+}
+
+/*  Session Header  */
+#sessions > li > div {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+}
+
+/*  Buttons  */
+button {
+    background: #3a3a6a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+    background: #5a5ab0;
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    background: #555;
+    cursor: not-allowed;
+}
+
+/*  Nested Driver List  */
+#sessions ul {
+    list-style: none;
+    margin: 10px 0 0 0;
+    padding-left: 0px;
+}
+
+#sessions ul li {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 6px 0;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+}
+
+#sessions ul li button:first-of-type {
+    margin-left: auto;
+}
+
+#sessions ul li button {
+    margin-left: 8px;
+}
+
+/*  Add Session Button  */
+#app > button {
+    display: block;
+    margin: 30px auto 0 auto;
+    padding: 12px 24px;
+    font-size: 1.1em;
+    background: #4e4ec7;
+    border-radius: 10px;
+}
+
+#app > button:hover {
+    background: #6a6ae0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 20px;
+    }
+    #app {
+        padding: 20px;
+    }
+    h2 {
+        font-size: 1.6em;
+    }
+    button {
+        font-size: 0.9em;
+    }
+    #sessions ul li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    #sessions ul li button {
+        margin: 5px 0 0 0;
+    }
 }

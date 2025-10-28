@@ -159,13 +159,11 @@ function renderSessions() {
 
             const edit = document.createElement('button');
             edit.textContent = 'Edit';
-            edit.style.marginLeft = '8px';
             edit.onclick = () => editDriver(s.id, d.name, d.carNumber);
             dli.appendChild(edit);
 
             const rem = document.createElement('button');
             rem.textContent = 'Remove';
-            rem.style.marginLeft = '8px';
             rem.onclick = () => removeDriverFromSession(s.id, d.name);
             dli.appendChild(rem);
             dl.appendChild(dli);
