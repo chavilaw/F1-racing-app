@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function renderSession() {
     document.querySelectorAll('li').forEach(li => li.remove());
+    const content = document.getElementById('content');
     const out = document.getElementById('SessionName');
     if (latestSessions.length === 0) {
         out.textContent = 'No sessions';
@@ -44,6 +45,6 @@ function renderSession() {
     (second.drivers || []).forEach(d => {
         const dli = document.createElement('li');
         dli.textContent = `Car ${d.carNumber} - ${d.name}`;
-        document.body.appendChild(dli);
+        content.appendChild(dli);
     });
 }
