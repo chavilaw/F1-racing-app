@@ -16,19 +16,23 @@
 
 .nav_main_box .nav_sidebar_menu {
     position: fixed;
-    height: 100vh;
+    top: 50px;
+    bottom: 0;
+    height: auto;
     width: 280px;
     left: -280px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     transition: all 0.3s linear;
     z-index: 1000;
+    border-top-right-radius: 20px;  
 }
 
 .nav_sidebar_menu .nav_logo {
     position: absolute;
     width: 100%;
-    height: 60px;
-    box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+    height: 75px;
+    box-shadow: 0 0 6px rgba(40, 40, 40, 0.5);
+    border-top-right-radius: 20px;
 }
 
 .nav_sidebar_menu .nav_logo a {
@@ -36,15 +40,15 @@
     font-size: 25px;
     font-weight: 500;
     position: absolute;
-    left: 50px;
-    line-height: 60px;
+    left: 25px;
+    line-height: 80px;
     text-decoration: none;
     font-family: 'Poppins', sans-serif;
 }
 
 .nav_sidebar_menu .nav_menu {
     position: absolute;
-    top: 80px;
+    top: 90px;
     width: 100%;
 }
 
@@ -56,20 +60,26 @@
 
 .nav_sidebar_menu .nav_menu i {
     color: #fff;
-    font-size: 20px;
-    padding-right: 8px;
+    font-size: 17px;
+    line-height: 1;
+    /* Make all icons take the same horizontal space */
+    width: 28px;              /* fixed visual width for all icons */
+    flex: 0 0 28px;           /* prevent flex from shrinking/growing */
+    text-align: center;       /* center the glyph in its box */
 }
 
 .nav_sidebar_menu .nav_menu a {
     color: #fff;
-    font-size: 20px;
+    font-size: 17px;
     text-decoration: none;
     font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .nav_sidebar_menu .nav_menu li:hover {
-    border-left: 1px solid #fff;
-    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+    background-color: rgba(27, 27, 27, 0.1);
 }
 
 #nav_check {
@@ -99,7 +109,7 @@
 
 .nav_sidebar_menu .nav_btn_two i {
     font-size: 25px;
-    line-height: 60px;
+    line-height: 80px;
     position: absolute;
     left: 240px;
     cursor: pointer;
