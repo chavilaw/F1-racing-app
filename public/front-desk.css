@@ -2,8 +2,8 @@
 body {
     margin: 0;
     padding: 40px;
-    background: linear-gradient(135deg, #1e1e2f, #2c2c54);
-    color: #fff;
+    background: white;
+    color: #000000;
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
@@ -32,7 +32,7 @@ h2 {
     margin-top: 0;
     font-size: 2em;
     letter-spacing: 1px;
-    color: #f8f8f8;
+    color: #000000;
 }
 
 /*  Session List  */
@@ -43,8 +43,8 @@ h2 {
 }
 
 #sessions > li {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px solid rgba(0, 0, 0, 0.1);
     border-radius: 12px;
     padding: 15px 20px;
     margin-bottom: 18px;
@@ -52,7 +52,7 @@ h2 {
 }
 
 #sessions > li:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(73, 73, 73, 0.1);
     transform: scale(1.01);
 }
 
@@ -64,8 +64,8 @@ h2 {
 
 /*  Buttons  */
 button {
-    background: #3a3a6a;
-    color: #fff;
+    background: #dbdbdb;
+    color: #000000;
     border: none;
     border-radius: 8px;
     padding: 8px 14px;
@@ -75,7 +75,7 @@ button {
 }
 
 button:hover {
-    background: #5a5ab0;
+    background: #c4c4c4;
     transform: translateY(-2px);
 }
 
@@ -115,12 +115,12 @@ button:disabled {
     margin: 30px auto 0 auto;
     padding: 12px 24px;
     font-size: 1.1em;
-    background: #4e4ec7;
+    background: #dbdbdb;
     border-radius: 10px;
 }
 
 #app > button:hover {
-    background: #6a6ae0;
+    background: #c4c4c4;
 }
 
 /* Responsive Design */
