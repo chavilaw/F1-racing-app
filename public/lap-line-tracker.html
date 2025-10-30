@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <title>Lap Line Tracker</title>
@@ -7,52 +8,54 @@
   <link rel="stylesheet" href="lap-line-tracker.css">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
+
 <body>
+  <main id="content">
+    <header>
+      <h1>Lap Line Tracker</h1>
+    </header>
 
-  <header>
-    <h1>Lap Line Tracker</h1>
-  </header>
+    <!-- Error box -->
+    <div id="error" aria-live="polite"></div>
 
-  <!-- Error box -->
-  <div id="error" aria-live="polite"></div>
+    <!-- Read-only race info (your JS writes here) -->
+    <section id="side-panel">
+      <h3>Race Information</h3>
+      <p><strong>Session:</strong> <span id="sessions">No session selected</span></p>
+      <p><strong>Drivers:</strong> <span id="driver-count">0/8 drivers</span></p>
+      <p><strong>Mode:</strong> <span id="current-race-mode">SAFE</span></p>
+      <p><strong>Duration:</strong> <span id="race-duration">Race not started</span></p>
+    </section>
 
-  <!-- Read-only race info (your JS writes here) -->
-  <section id="side-panel">
-    <h3>Race Information</h3>
-    <p><strong>Session:</strong> <span id="sessions">No session selected</span></p>
-    <p><strong>Drivers:</strong> <span id="driver-count">0/8 drivers</span></p>
-    <p><strong>Mode:</strong> <span id="current-race-mode">SAFE</span></p>
-    <p><strong>Duration:</strong> <span id="race-duration">Race not started</span></p>
-  </section>
+    <!-- Main app (shown after successful auth) -->
+    <div id="app" style="display: none;">
 
-  <!-- Main app (shown after successful auth) -->
-  <div id="app" style="display: none;">
+      <!-- Session picker -->
+      <h2>Select Session</h2>
+      <label for="sessionSelect">Session:</label>
+      <select id="sessionSelect"></select>
 
-    <!-- Session picker -->
-    <h2>Select Session</h2>
-    <label for="sessionSelect">Session:</label>
-    <select id="sessionSelect"></select>
+      <hr />
 
-    <hr />
+      <!-- Lap buttons -->
+      <h2>Lap Buttons</h2>
+      <div id="grid"></div>
 
-    <!-- Lap buttons -->
-    <h2>Lap Buttons</h2>
-    <div id="grid"></div>
+      <hr />
 
-    <hr />
+      <button id="logout" type="button">Logout</button>
+    </div>
 
-    <button id="logout" type="button">Logout</button>
-  </div>
+    <!-- Fullscreen button -->
+    <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
+      <i class="fas fa-expand"></i>
+    </button>
 
-  <!-- Fullscreen button -->
-  <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
-    <i class="fas fa-expand"></i>
-  </button>
-
-  <!-- Socket.IO + page script -->
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="fullscreen.js"></script>
-  <script src="/lap-line-tracker.js"></script>
-  <script src="nav.js"></script>
+    <!-- Socket.IO + page script -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="fullscreen.js"></script>
+    <script src="/lap-line-tracker.js"></script>
+    <script src="nav.js"></script>
+  </main>
 </body>
 </html>
