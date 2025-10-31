@@ -5,6 +5,50 @@
 The **Beachside Racetrack** MVP-system for a real-time racing management platform designed to coordinate multiple user roles during race events.  
 It provides synchronized interfaces for race control, lap tracking, and public viewing.  
 The system is powered by **Node.js**, **Express**, and **Socket.IO**, enabling instant communication between different terminals and user roles.
+---
+## Install & Setup
+
+1. Clone the Repository
+git clone https://gitea.kood.tech/iidapuomila/racetrack.git
+cd racetrack
+
+2. Install Dependencies
+
+This project requires Node.js
+ (v18 or newer) and npm.
+Install all required dependencies with:
+
+```
+npm install
+```
+3. Configure Environment Variables
+
+Create a file named .env in the project root and add the following keys:
+
+```
+RECEPTIONIST_KEY=rec123
+OBSERVER_KEY=obs123
+SAFETY_KEY=saf123
+PERSIST=true
+
+```
+These keys define access credentials for each user interface.
+The optional PERSIST=true enables saving and reloading race data between server restarts.
+
+4. Start the Server
+
+Run the application using:
+
+```
+npm start
+
+```
+or to explicitly enable persistence:
+
+```
+npm run start:persist
+
+```
 
 ---
 
@@ -35,7 +79,6 @@ Role/Route
 **Public Visitors/eg.Leader Board Display/leader-board.html**  
 * Displays the live leaderboard, race flag, and remaining time for all spectators. 
 * Guests, race drivers, and spectators can view race information such as results, upcoming races, and countdowns.
-
 ---
 
 
