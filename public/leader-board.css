@@ -4,7 +4,6 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  background-color: #f0f0f0;
   color: #222;
 }
 
@@ -22,7 +21,7 @@ header h1 {
 /* Cards */
 #info-card,
 #board-card {
-  background: #fff;
+  background: #dddddd;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);

@@ -2,7 +2,11 @@ const { resolveMx } = require('dns');
 const express = require('express'); // tool to serve pages
 const http = require('http'); // required by Socket.IO
 const path = require('path');
+const fs = require('fs');
 const { Server } = require('socket.io'); // real-time connections
+
+const PERSIST = process.argv.includes('--persist');
+const PERSIST_FILE = path.join(__dirname, 'data.json');
 
 if (!process.env.RECEPTIONIST_KEY || !process.env.OBSERVER_KEY || !process.env.SAFETY_KEY) { // IF KEYS NOT SET, SERVER WILL NOT START
   console.error('Error: Missing access keys. Set RECEPTIONIST_KEY, OBSERVER_KEY, SAFETY_KEY.');
@@ -21,10 +25,12 @@ app.get('/', (req, res) => {
 
 server.listen(3000, () => {
   console.log('Server listening on http://localhost:3000');
-  console.log('http://localhost:3000/login.html'); // can add more direct links for testing purposes
+  console.log(`Persistence: ${PERSIST ? 'ENABLED' : 'DISABLED'} (start with --persist to enable)`);
 });
 
 let sessions = [];
+let StoredRaceData = null;
+let resumeTimerInterval = null;
 
 function getSession(sessionId) {
   return sessions.find(s => String(s.id) === String(sessionId));
@@ -32,6 +38,7 @@ function getSession(sessionId) {
 
 function broadcastSessions() {
   io.emit('sessions', sessions);
+  debSaveState();
 }
 
 function isAuthorized(socket, role) {
@@ -46,11 +53,123 @@ function getAvailableCarNumber(session) {
   return null;
 }
 
-let StoredRaceData = null;
+function loadState() {
+  if (!PERSIST) return;
+  try {
+    if (!fs.existsSync(PERSIST_FILE)) return;
+    const raw = fs.readFileSync(PERSIST_FILE, 'utf8');
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (parsed.sessions && Array.isArray(parsed.sessions)) sessions = parsed.sessions;
+    if (parsed.StoredRaceData) StoredRaceData = parsed.StoredRaceData;
+    console.log('Loaded state from', PERSIST_FILE);
+  } catch (err) {
+    console.error('Failed to load persisted state', err);
+  }
+}
+
+function saveState() {
+  if (!PERSIST) return;
+  try {
+    const tmp = PERSIST_FILE + '.tmp';
+    const data = { sessions, StoredRaceData: StoredRaceData };
+    fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
+    fs.renameSync(tmp, PERSIST_FILE);
+    //console.log('Saved state to', PERSIST_FILE); // testing logging
+  } catch (err) {
+    console.error('Failed to save state', err);
+  }
+}
+
+let saveScheduled = false;
+function debSaveState() {
+  if (!PERSIST) return;
+  if (saveScheduled) return;
+  saveScheduled = true;
+  setTimeout(() => {
+    saveScheduled = false;
+    saveState();
+  }, 200);
+}
+
+function restoreServerTimer() {
+  if (resumeTimerInterval) {
+    clearInterval(resumeTimerInterval);
+    resumeTimerInterval = null;
+  }
+
+  if (!StoredRaceData || !StoredRaceData.raceActive) return;
+
+  let endTs = null;
+  if (StoredRaceData.endTs && Number.isFinite(Number(StoredRaceData.endTs))) {
+    endTs = Number(StoredRaceData.endTs);
+  } else if (StoredRaceData.timeLeft != null) {
+    endTs = Date.now() + Number(StoredRaceData.timeLeft) * 1000;
+    StoredRaceData.endTs = endTs;
+    debSaveState();
+  } else {
+    // nothing we can resume
+    return;
+  }
+
+  StoredRaceData.raceActive = true;
+
+  // Tick function: emit remaining seconds each second
+  function tick() {
+    const remainingMs = Math.max(0, endTs - Date.now());
+    const remainingSec = Math.ceil(remainingMs / 1000);
+    // Compose payload similar to what race-control used
+    const payload = {
+      timeLeft: remainingSec,
+      raceActive: remainingSec > 0,
+      raceMode: StoredRaceData.raceMode,
+      sessionId: StoredRaceData.sessionId,
+      // keep endTs so future restarts can resume
+      endTs: endTs
+    };
+    // update stored snapshot
+    StoredRaceData.timeLeft = remainingSec;
+    StoredRaceData.endTs = endTs;
+    StoredRaceData.raceActive = payload.raceActive;
+
+    io.emit('timer-update', payload);
+    debSaveState();
+
+    if (!payload.raceActive) {
+      // race finished — clear interval and set final mode
+      clearInterval(resumeTimerInterval);
+      resumeTimerInterval = null;
+      StoredRaceData.raceActive = false;
+      StoredRaceData.raceMode = 'finish';
+      // final broadcast
+      io.emit('timer-update', {
+        timeLeft: 0,
+        raceActive: false,
+        raceMode: 'finish',
+        sessionId: StoredRaceData.sessionId,
+        endTs: endTs
+      });
+      debSaveState();
+    }
+  }
+
+  // Immediately send one tick then set interval
+  tick();
+  resumeTimerInterval = setInterval(tick, 1000);
+}
+
+if (PERSIST) {
+  loadState();
+  if (StoredRaceData && StoredRaceData.raceActive) {
+    console.log('Resuming race timer from persisted state...');
+    restoreServerTimer();
+  }
+}
 
 io.on('connection', (socket) => { // socket object for every unique user
   console.log('Client connected');
   socket.emit('sessions', sessions);
+
   socket.on('request-race-data', () => {
     socket.emit('timer-update', StoredRaceData);
   });
@@ -91,7 +210,7 @@ io.on('connection', (socket) => { // socket object for every unique user
     if (!isAuthorized(socket, 'receptionist') && !isAuthorized(socket, 'safety')) {
       return cb && cb({ error: 'not authorized' });
     }
-    
+
     if (!payload || !payload.sessionId) return cb && cb({ error: 'invalid payload' });
 
     const idx = sessions.findIndex(s => String(s.id) === String(payload.sessionId));
@@ -197,81 +316,118 @@ io.on('connection', (socket) => { // socket object for every unique user
   });
 
   socket.on('timer-update', (raceData) => { // re-broadcast race data
-    if (socket.role !== 'safety') { 
+    if (socket.role !== 'safety') {
       console.warn('Unauthorized timer update attempt');
+      return;
     }
 
-    StoredRaceData = raceData;
+    const now = Date.now();
+    if (raceData && raceData.raceActive && Number.isFinite(Number(raceData.timeLeft))) {
+      const endTs = now + Number(raceData.timeLeft) * 1000;
+      StoredRaceData = Object.assign({}, raceData, { endTs: endTs, lastUpdated: now });
+    } else {
+      StoredRaceData = Object.assign({}, raceData, { lastUpdated: now });
+    }
 
-    io.emit('timer-update', raceData);
+    // persist and forward
+    debSaveState();
+    io.emit('timer-update', StoredRaceData);
+
+    // If persisted and raceActive, ensure server also keeps a resume timer (so it can continue itself later)
+    if (PERSIST && StoredRaceData && StoredRaceData.raceActive) {
+      // cancel any existing resume interval
+      if (resumeTimerInterval) clearInterval(resumeTimerInterval);
+      restoreServerTimer();
+    }
   });
 
   socket.on('race-mode-change', (raceModeData) => { // re-broadcast race mode changes
-    if (socket.role !== 'safety') { 
+    if (socket.role !== 'safety') {
       console.warn('Unauthorized race mode change attempt');
       return;
+    }
+
+    if (PERSIST) {
+      StoredRaceData = Object.assign({}, StoredRaceData || {}, { raceMode: raceModeData.raceMode, lastUpdated: Date.now() });
+      debSaveState();
     }
 
     io.emit('race-mode-change', raceModeData);
   });
 
   socket.on('lap:crossed', (payload) => {
-  // allow from observer (and optionally safety)
-  if (socket.role !== 'observer' && socket.role !== 'safety') {
-    console.warn('Unauthorized lap crossed attempt');
-    return;
-  }
-  if (!payload || payload.sessionId == null || payload.carNumber == null) return;
-
-  const s = getSession(payload.sessionId);
-  if (!s) return;
-
-  const carNum = Number(payload.carNumber);
-  if (!Number.isFinite(carNum)) return;
-
-  const d = (s.drivers || []).find(x => Number(x.carNumber) === carNum);
-  if (!d) return;
-
-  // --- timing (server is source of truth) ---
-  const serverNow = Date.now();
-  const clientNow = Number(payload.crossedAt);
-  if (Number.isFinite(clientNow) && Math.abs(clientNow - serverNow) > 1500) {
-    console.warn(`Lap timestamp drift for car ${carNum}: client ${clientNow - serverNow}ms`);
-  }
-
-  const prevStamp = d.lastLapStamp;   // may be null on first lap
-  d.lastLapStamp = serverNow;
-
-  const prevLap = Number(d.currentLap) || 0;
-  const nextLap = prevLap + 1;
-  d.currentLap = nextLap;
-
-  let lapTimeMs = null;
-  if (Number.isFinite(prevStamp)) {
-    lapTimeMs = serverNow - prevStamp;
-    if (lapTimeMs <= 0 || !Number.isFinite(lapTimeMs)) lapTimeMs = null;
-  }
-
-  // update fastest
-  if (lapTimeMs != null) {
-    if (d.fastestLapMs == null || lapTimeMs < d.fastestLapMs) {
-      d.fastestLapMs = lapTimeMs;
+    // allow from observer (and optionally safety)
+    if (socket.role !== 'observer' && socket.role !== 'safety') {
+      console.warn('Unauthorized lap crossed attempt');
+      return;
     }
+    if (!payload || payload.sessionId == null || payload.carNumber == null) return;
+
+    const s = getSession(payload.sessionId);
+    if (!s) return;
+
+    const carNum = Number(payload.carNumber);
+    if (!Number.isFinite(carNum)) return;
+
+    const d = (s.drivers || []).find(x => Number(x.carNumber) === carNum);
+    if (!d) return;
+
+    // --- timing (server is source of truth) ---
+    const serverNow = Date.now();
+    const clientNow = Number(payload.crossedAt);
+    if (Number.isFinite(clientNow) && Math.abs(clientNow - serverNow) > 1500) {
+      console.warn(`Lap timestamp drift for car ${carNum}: client ${clientNow - serverNow}ms`);
+    }
+
+    const prevStamp = d.lastLapStamp;   // may be null on first lap
+    d.lastLapStamp = serverNow;
+
+    const prevLap = Number(d.currentLap) || 0;
+    const nextLap = prevLap + 1;
+    d.currentLap = nextLap;
+
+    let lapTimeMs = null;
+    if (Number.isFinite(prevStamp)) {
+      lapTimeMs = serverNow - prevStamp;
+      if (lapTimeMs <= 0 || !Number.isFinite(lapTimeMs)) lapTimeMs = null;
+    }
+
+    // update fastest
+    if (lapTimeMs != null) {
+      if (d.fastestLapMs == null || lapTimeMs < d.fastestLapMs) {
+        d.fastestLapMs = lapTimeMs;
+      }
+    }
+
+    // refresh snapshot for everyone (Reception, Lapline, Leaderboard, etc.)
+    broadcastSessions();
+
+    // targeted event leaderboards listen to
+    io.emit('lap:recorded', {
+      sessionId: s.id,
+      driverId: String(d.carNumber),   // canonical client key = String(carNumber)
+      carNumber: d.carNumber,
+      lapNumber: nextLap,
+      lapTimeMs: lapTimeMs ?? undefined,
+      crossedAt: serverNow
+    });
+
+  });
+
+});
+
+process.on('SIGINT', () => {
+  if (PERSIST) {
+    console.log('SIGINT received - saving state and exiting...');
+    saveState();
   }
+  process.exit(0);
+});
 
-  // refresh snapshot for everyone (Reception, Lapline, Leaderboard, etc.)
-  broadcastSessions();
-
-  // targeted event leaderboards listen to
-  io.emit('lap:recorded', {
-    sessionId: s.id,
-    driverId: String(d.carNumber),   // canonical client key = String(carNumber)
-    carNumber: d.carNumber,
-    lapNumber: nextLap,
-    lapTimeMs: lapTimeMs ?? undefined,
-    crossedAt: serverNow
-  });
-
-  });
-
-}); 
+process.on('SIGTERM', () => {
+  if (PERSIST) {
+    console.log('SIGTERM received - saving state and exiting...');
+    saveState();
+  }
+  process.exit(0);
+});
