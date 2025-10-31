@@ -40,3 +40,4 @@ Role/Route
 
 
 Command to run server: RECEPTIONIST_KEY=rec123 OBSERVER_KEY=obs123 SAFETY_KEY=saf123 npm start
+Run with persistence: RECEPTIONIST_KEY=rec123 OBSERVER_KEY=obs123 SAFETY_KEY=saf123 npm start -- --persist
