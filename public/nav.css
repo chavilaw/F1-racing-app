@@ -138,3 +138,78 @@
 #nav_check:checked ~ .nav_sidebar_menu .nav_btn_two i {
     opacity: 1;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .nav_main_box .nav_sidebar_menu {
+        width: 260px;
+    }
+    
+    .nav_main_box .nav_btn_one i {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+        left: 12px;
+        top: 15px;
+    }
+    
+    .nav_sidebar_menu .nav_logo a {
+        font-size: 22px;
+        left: 20px;
+    }
+    
+    .nav_sidebar_menu .nav_menu i {
+        font-size: 20px;
+    }
+    
+    .nav_sidebar_menu .nav_menu a {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav_main_box .nav_sidebar_menu {
+        width: 240px;
+    }
+    
+    .nav_main_box .nav_btn_one i {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+        left: 10px;
+        top: 10px;
+    }
+    
+    .nav_sidebar_menu .nav_logo {
+        height: 50px;
+    }
+    
+    .nav_sidebar_menu .nav_logo a {
+        font-size: 20px;
+        left: 15px;
+        line-height: 50px;
+    }
+    
+    .nav_sidebar_menu .nav_menu {
+        top: 70px;
+    }
+    
+    .nav_sidebar_menu .nav_menu li {
+        padding: 12px 15px;
+    }
+    
+    .nav_sidebar_menu .nav_menu i {
+        font-size: 18px;
+        width: 24px;
+        flex: 0 0 24px;
+    }
+    
+    .nav_sidebar_menu .nav_menu a {
+        font-size: 16px;
+    }
+    
+    .nav_sidebar_menu .nav_btn_two i {
+        left: 210px;
+        font-size: 22px;
+    }
+}

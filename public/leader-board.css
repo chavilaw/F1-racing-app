@@ -124,21 +124,56 @@ table#leaderboard {
   font-style: italic;
 }
 
-/* Optional: basic responsiveness */
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  #info-card,
+  #board-card {
+    padding: 15px;
+    margin: 15px 10px;
+  }
+  
+  #timer-text { 
+    font-size: 48px; 
+  }
+  
+  header h1 {
+    font-size: 24px;
+    padding-top: 15px;
+  }
+}
+
 @media (max-width: 640px) {
-  #timer-text { font-size: 44px; }
-  #leaderboard thead { display: none; }
+  #timer-text { 
+    font-size: 44px; 
+  }
+  
+  #info-card,
+  #board-card {
+    padding: 12px;
+    margin: 12px 5px;
+  }
+  
+  header h1 {
+    font-size: 20px;
+  }
+  
+  #leaderboard thead { 
+    display: none; 
+  }
+  
   #leaderboard tbody td {
     display: block;
     padding: 8px 12px;
     border-bottom: none;
   }
+  
   #leaderboard tbody tr {
     border: 1px solid #eee;
     border-radius: 8px;
     margin-bottom: 8px;
     overflow: hidden;
   }
+  
   #leaderboard tbody td::before {
     content: attr(data-label);
     display: block;
@@ -147,5 +182,20 @@ table#leaderboard {
     margin-bottom: 2px;
     text-transform: uppercase;
     letter-spacing: .04em;
+  }
+}
+
+@media (max-width: 480px) {
+  #timer-text { 
+    font-size: 36px; 
+  }
+  
+  #timer-status {
+    font-size: 14px;
+  }
+  
+  #info-card h3,
+  #board-card h3 {
+    font-size: 18px;
   }
 }

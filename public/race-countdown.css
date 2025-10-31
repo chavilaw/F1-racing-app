@@ -73,4 +73,32 @@
     .countdown-container {
         padding: 20px;
     }
+    
+    .status-banner {
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .timer-display {
+        font-size: 3.5rem;
+        margin: 15px 0;
+    }
+    
+    .countdown-title {
+        font-size: 1.5rem;
+        margin: 0 0 20px 0;
+    }
+    
+    .countdown-container {
+        padding: 15px;
+        width: 95%;
+    }
+    
+    .status-banner {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+        margin-top: 20px;
+    }
 }

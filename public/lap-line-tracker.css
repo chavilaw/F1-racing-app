@@ -141,3 +141,77 @@ hr {
 #logout:hover {
   background-color: #7f8c8d;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    #content {
+        padding: 10px;
+    }
+    
+    header h1 {
+        font-size: 24px;
+    }
+    
+    #side-panel, #app {
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    #grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 10px;
+    }
+    
+    #grid button {
+        padding: 16px 0;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    #content {
+        padding: 5px;
+    }
+    
+    header {
+        margin-bottom: 15px;
+    }
+    
+    header h1 {
+        font-size: 20px;
+    }
+    
+    #side-panel, #app {
+        padding: 12px;
+        margin: 12px 0;
+    }
+    
+    #side-panel h3 {
+        font-size: 18px;
+    }
+    
+    #side-panel p {
+        font-size: 14px;
+    }
+    
+    #grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 8px;
+    }
+    
+    #grid button {
+        padding: 14px 0;
+        font-size: 18px;
+        min-height: 44px; /* Touch-friendly */
+    }
+    
+    #sessionSelect {
+        width: 100%;
+        margin-top: 5px;
+    }
+    
+    label[for="sessionSelect"] {
+        display: block;
+        margin-bottom: 5px;
+    }
+}
