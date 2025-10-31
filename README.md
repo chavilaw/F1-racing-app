@@ -1,6 +1,6 @@
 # Racetrack info-screens by Chavilah Wong, Aleksi Räisänen and Iida Puomila 
 
-## Overview of the project
+# Overview of the project
 
 The **Beachside Racetrack** MVP-system for a real-time racing management platform designed to coordinate multiple user roles during race events.  
 It provides synchronized interfaces for race control, lap tracking, and public viewing.  
@@ -20,6 +20,7 @@ Install all required dependencies with:
 
 ```
 npm install
+
 ```
 3. Configure Environment Variables
 
@@ -58,6 +59,8 @@ The application runs a single Node.js server that:
 - Synchronizes race state across multiple connected clients.
 - Exposes dedicated browser-based user interfaces for each operational role.
 - Broadcasts live updates such as race mode changes, lap crossings, and leaderboard data.
+ Tip: look up ERD-diagram for the relationships  
+
 
 ### Roles
 Role/Route
@@ -82,5 +85,3 @@ Role/Route
 ---
 
 
-Command to run server: RECEPTIONIST_KEY=rec123 OBSERVER_KEY=obs123 SAFETY_KEY=saf123 npm start
-Run with persistence: RECEPTIONIST_KEY=rec123 OBSERVER_KEY=obs123 SAFETY_KEY=saf123 npm start -- --persist
