@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { resolveMx } = require('dns');
 const express = require('express'); // tool to serve pages
 const http = require('http'); // required by Socket.IO
@@ -5,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const { Server } = require('socket.io'); // real-time connections
 
-const PERSIST = process.argv.includes('--persist');
+const PERSIST = process.argv.includes('--persist')|| process.env.PERSIST === 'true';
 const PERSIST_FILE = path.join(__dirname, 'data.json');
 
 if (!process.env.RECEPTIONIST_KEY || !process.env.OBSERVER_KEY || !process.env.SAFETY_KEY) { // IF KEYS NOT SET, SERVER WILL NOT START
