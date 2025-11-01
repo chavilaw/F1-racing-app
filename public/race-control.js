@@ -20,6 +20,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     socket = io(); // connect to server
 
+    // Listen for race duration from server (for dev mode)
+    socket.on('race-config', (config) => {
+        if (config && config.duration) {
+            raceDuration = config.duration;
+            console.log('Race duration set to:', raceDuration, 'seconds');
+        }
+    });
+
     socket.on('sessions', (sessions) => {
         latestSessions = Array.isArray(sessions) ? sessions : [];
         
@@ -312,7 +320,7 @@ function initializeRaceControlButtons() {
         console.log('Start button found, adding click listener...');
         startBtn.addEventListener('click', () => {
             console.log('Start button clicked!');
-            startTimer(300);
+            startTimer(raceDuration);
         });
         console.log('Click listener added successfully');
     } else {
