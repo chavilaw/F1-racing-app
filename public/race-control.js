@@ -98,6 +98,7 @@ let raceActive = false;
 let timeLeft = 0;
 let raceStartTime = null;
 let timerInterval = null;
+let raceDuration = 600; // Default to 10 minutes (600 seconds), will be updated from server
 let currentSession = null;
 let startBtn, stopBtn, emergencyBtn;
 let currentRaceMode = 'SAFE'; // Default race mode

@@ -17,6 +17,11 @@ const app = express(); // "app" is the Express web app
 const server = http.createServer(app); // "server" is the HTTP server that Express runs on
 const io = new Server(server); // "io" is the Socket.IO server attached to the HTTP server
 
+// Read race duration from environment (in milliseconds), default to 10 minutes (600000ms)
+const RACE_DURATION_MS = process.env.RACE_DURATION ? parseInt(process.env.RACE_DURATION, 10) : 600000;
+const RACE_DURATION_SECONDS = Math.floor(RACE_DURATION_MS / 1000);
+console.log(`Race duration: ${RACE_DURATION_SECONDS} seconds (${RACE_DURATION_SECONDS === 60 ? 'DEV MODE' : 'NORMAL MODE'})`);
+
 app.use(express.static(path.join(__dirname, 'public'))); // anything in public/ can be viewed in the browser
 
 app.get('/', (req, res) => {
@@ -170,6 +175,8 @@ if (PERSIST) {
 io.on('connection', (socket) => { // socket object for every unique user
   console.log('Client connected');
   socket.emit('sessions', sessions);
+  // Send race duration configuration to client
+  socket.emit('race-config', { duration: RACE_DURATION_SECONDS });
 
   socket.on('request-race-data', () => {
     socket.emit('timer-update', StoredRaceData);
