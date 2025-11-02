@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Countdown</title>
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="race-countdown.css">
+</head>
+
+<body>
+    <main id="content">
+        <div class="countdown-container">
+            <!-- Title heading -->
+            <h1 class="countdown-title">Race Countdown</h1>
+
+            <!-- Big countdown timer (MM:SS) -->
+            <div id="timer" class="timer-display">--:--</div>
+
+            <!-- Status banner at bottom -->
+            <div id="statusBanner" class="status-banner"></div>
+        </div>
+    </main>
+
+    <!-- Fullscreen button -->
+    <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
+        <i class="fas fa-expand"></i>
+    </button>
+
+    <!-- Socket.IO and Race Countdown Script -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="nav.js"></script>
+    <script src="fullscreen.js"></script>
+    <script src="race-countdown.js"></script>
+</body>
+
+</html>

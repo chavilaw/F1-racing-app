@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="front-desk.css">
+    <script src="/socket.io/socket.io.js" defer></script>
+    <script src="front-desk.js" defer></script>
+    <script src="nav.js" defer></script>
+    <title>Front Desk</title>
+</head>
+
+<body>
+    <main id="content">
+        <p id="error"></p>
+        <div id="app" style="display: none;">
+            <h2>Race Sessions</h2>
+            <ul id="sessions"></ul>
+            <button onclick="addSession()">Add Session</button>
+        </div>
+    </main>
+</body>
+</html>

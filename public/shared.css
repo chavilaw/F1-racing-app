@@ -1,0 +1,93 @@
+/* Shared Styles for All Interfaces */
+
+/* Fullscreen Button - Universal */
+.fullscreen-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fullscreen-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+.fullscreen-btn i {
+    color: #333;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* Navigation Styles (if you add the nav later) */
+.side-nav {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100vh;
+    background: #333;
+    transition: left 0.3s ease;
+    z-index: 1001;
+}
+
+.side-nav.open {
+    left: 0;
+}
+
+/* Common utility classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mb-20 { margin-bottom: 20px; }
+.mt-20 { margin-top: 20px; }
+.p-20 { padding: 20px; }
+
+/* Responsive helpers */
+@media (max-width: 768px) {
+    .fullscreen-btn {
+        width: 50px;
+        height: 50px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .fullscreen-btn i {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fullscreen-btn {
+        width: 44px;
+        height: 44px;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .fullscreen-btn i {
+        font-size: 16px;
+    }
+    
+    /* Touch-friendly - remove hover on mobile */
+    .fullscreen-btn:hover {
+        transform: none;
+    }
+    
+    .fullscreen-btn:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+}

@@ -1,0 +1,72 @@
+#content {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at center, #1e1e2f 0%, #141423 100%);
+    color: #fff;
+    font-family: "Segoe UI", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+
+#SessionName {
+    text-align: center;
+    font-size: 80px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+    animation: fadeIn 1.5s ease-in-out, pulse 3s infinite alternate;
+}
+
+/* Only style li elements within the main content, not navigation */
+#content li {
+    list-style: none;
+    font-size: 32px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 10px 0;
+    padding: 15px 25px;
+    border-radius: 10px;
+    width: 50%;
+    text-align: center;
+    transition: background 0.3s, transform 0.2s;
+}
+
+#content li:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: scale(1.02);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    #SessionName {
+        font-size: 48px;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+    }
+    
+    #content li {
+        font-size: 20px;
+        padding: 12px 20px;
+        width: 80%;
+    }
+}
+
+@media (max-width: 480px) {
+    #SessionName {
+        font-size: 36px;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }
+    
+    #content li {
+        font-size: 16px;
+        padding: 10px 15px;
+        width: 90%;
+        margin: 8px 0;
+    }
+}

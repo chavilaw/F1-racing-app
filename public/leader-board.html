@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Leaderboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="/leader-board.css" />
+</head>
+<body>
+
+  <header>
+    <h1>Leaderboard</h1>
+  </header>
+
+  <!-- Info / status panel -->
+  <section id="info-card">
+    <h3>Race Information</h3>
+    <p><strong>Session:</strong> <span id="session-name">—</span></p>
+    <div class="timer">
+      <div id="timer-text">--:--</div>
+      <div id="timer-status">LIVE</div>
+    </div>
+    <div id="flag" class="flag">
+      <span id="flag-text">—</span>
+    </div>
+  </section>
+
+  <!-- Leaderboard table -->
+  <section id="board-card">
+    <h3>Fastest Laps</h3>
+    <table id="leaderboard" aria-label="Leaderboard">
+      <thead>
+        <tr>
+          <th>Pos</th>
+          <th>Car</th>
+          <th>Driver</th>
+          <th>Best Lap</th>
+          <th>Current Lap</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body">
+        <!-- rows injected by JS -->
+      </tbody>
+    </table>
+    <p id="post-session-note" hidden>
+      Session finished — results shown until the next session begins.
+    </p>
+  </section>
+
+  <!-- Fullscreen button -->
+  <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
+    <i class="fas fa-expand"></i>
+  </button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="nav.js"></script>
+  <script src="fullscreen.js"></script>
+  <script src="/leader-board.js"></script>
+</body>
+</html>
