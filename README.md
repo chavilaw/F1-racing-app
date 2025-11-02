@@ -84,3 +84,14 @@ Role/Route
 
 Command to run server: RECEPTIONIST_KEY=rec123 OBSERVER_KEY=obs123 SAFETY_KEY=saf123 npm start
 Run with persistence: RECEPTIONIST_KEY=rec123 OBSERVER_KEY=obs123 SAFETY_KEY=saf123 npm start -- --persist
+
+## Access from Other Networks
+
+To make the server accessible from devices on different networks (e.g., testing with phone):
+
+1. Install ngrok: `brew install ngrok/ngrok/ngrok`
+2. Sign up at https://dashboard.ngrok.com/signup and get your auth token
+3. Configure: `ngrok config add-authtoken YOUR_TOKEN`
+4. Start server: `npm start`
+5. In another terminal: `./ngrok.sh` (or `ngrok http 3000`)
+6. Use the ngrok Forwarding URL from any device
