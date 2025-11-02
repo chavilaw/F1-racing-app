@@ -1,0 +1,416 @@
+/* Race Control Interface Styles */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: #333;
+    margin: 0;
+}
+
+#race-status {
+    color: #666;
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+/* Timer - Biggest, most prominent */
+.timer {
+    text-align: center;
+    margin: 30px 0;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#timer-text {
+    font-size: 72px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 0;
+    font-family: 'Courier New', monospace;
+}
+
+#timer-status {
+    font-size: 24px;
+    color: #7f8c8d;
+    margin: 10px 0 0 0;
+}
+
+/* Race Mode Buttons */
+.race-mode {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.race-mode button {
+    padding: 15px 25px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#safe-mode-btn {
+    background-color: #27ae60;
+    color: white;
+}
+
+#hazard-mode-btn {
+    background-color: #f39c12;
+    color: white;
+}
+
+#danger-mode-btn {
+    background-color: #e74c3c;
+    color: white;
+}
+
+#finish-mode-btn {
+    background: linear-gradient(45deg, #000 25%, #fff 25%, #fff 50%, #000 50%, #000 75%, #fff 75%);
+    background-size: 20px 20px;
+    color: #333;
+    font-weight: bold;
+}
+
+.race-mode button.active {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Race Control Buttons */
+.race-control {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.race-control button {
+    padding: 20px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#start-race-btn {
+    background-color: #27ae60;
+    color: white;
+}
+
+#stop-race-btn {
+    background-color: #e74c3c;
+    color: white;
+}
+
+#emergency-stop-btn {
+    background-color: #c0392b;
+    color: white;
+    font-size: 24px;
+    padding: 25px 35px;
+}
+
+.race-control button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+/* Layout */
+.race-info {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+.race-info h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.race-info p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.driver-briefing {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+.driver-briefing h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+#driver-list {
+    list-style: none;
+    padding: 0;
+}
+
+#driver-list li {
+    padding: 10px;
+    margin: 5px 0;
+    background: #ecf0f1;
+    border-radius: 5px;
+    border-left: 4px solid #3498db;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+}
+
+#logout {
+    background-color: #95a5a6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#logout:hover {
+    background-color: #7f8c8d;
+}
+
+/* App container */
+#app {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+#sessions-list {
+    list-style: none;
+    padding: 0;
+}
+
+#sessions-list li {
+    padding: 10px;
+    margin: 5px 0;
+    background: #ecf0f1;
+    border-radius: 5px;
+}
+
+/* RESPONSIVE DESIGN FOR MOBILE DEVICES */
+/* ===================================== */
+
+/* Tablet (iPad) - 768px and below */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    #timer-text {
+        font-size: 56px; /* Smaller timer for tablet */
+    }
+    
+    .race-mode {
+        flex-wrap: wrap; /* Allow buttons to wrap */
+        gap: 10px;
+    }
+    
+    .race-mode button {
+        padding: 12px 20px;
+        font-size: 16px;
+        flex: 1; /* Equal width buttons */
+        min-width: 120px;
+    }
+    
+    .race-control {
+        flex-direction: column; /* Stack vertically on tablet */
+        gap: 15px;
+    }
+    
+    .race-control button {
+        padding: 18px 25px;
+        font-size: 18px;
+        width: 100%; /* Full width buttons */
+    }
+    
+    #emergency-stop-btn {
+        font-size: 20px;
+        padding: 20px 30px;
+    }
+}
+
+/* Mobile Phone - 480px and below */
+@media (max-width: 480px) {
+    body {
+        padding: 5px;
+    }
+    
+    header h1 {
+        font-size: 24px; /* Smaller header */
+    }
+    
+    #race-status {
+        font-size: 16px;
+    }
+    
+    #timer-text {
+        font-size: 48px; /* Much smaller timer for phone */
+    }
+    
+    #timer-status {
+        font-size: 18px;
+    }
+    
+    .timer {
+        margin: 20px 0;
+        padding: 15px;
+    }
+    
+    .race-mode {
+        gap: 8px;
+        margin: 20px 0;
+    }
+    
+    .race-mode button {
+        padding: 10px 15px;
+        font-size: 14px;
+        min-width: 80px;
+    }
+    
+    .race-control {
+        margin: 20px 0;
+        gap: 12px;
+    }
+    
+    .race-control button {
+        padding: 15px 20px;
+        font-size: 16px;
+    }
+    
+    #emergency-stop-btn {
+        font-size: 18px;
+        padding: 18px 25px;
+    }
+    
+    .race-info, .driver-briefing, #app {
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .race-info h3, .driver-briefing h3 {
+        font-size: 18px;
+    }
+    
+    .race-info p {
+        font-size: 14px;
+    }
+    
+    #driver-list li {
+        padding: 8px;
+        font-size: 14px;
+    }
+    
+    #sessions-list li {
+        padding: 8px;
+        font-size: 14px;
+    }
+}
+
+/* Landscape Mobile - 480px height and below */
+@media (max-height: 480px) and (orientation: landscape) {
+    body {
+        padding: 5px;
+    }
+    
+    header {
+        margin-bottom: 15px;
+    }
+    
+    header h1 {
+        font-size: 20px;
+    }
+    
+    #timer-text {
+        font-size: 40px; /* Compact timer for landscape */
+    }
+    
+    .timer {
+        margin: 15px 0;
+        padding: 10px;
+    }
+    
+    .race-mode {
+        margin: 15px 0;
+        gap: 5px;
+    }
+    
+    .race-mode button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .race-control {
+        margin: 15px 0;
+        gap: 8px;
+    }
+    
+    .race-control button {
+        padding: 12px 18px;
+        font-size: 14px;
+    }
+    
+    #emergency-stop-btn {
+        font-size: 16px;
+        padding: 15px 20px;
+    }
+    
+    .race-info, .driver-briefing, #app {
+        padding: 10px;
+        margin: 10px 0;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets for mobile devices */
+    .race-mode button, .race-control button {
+        min-height: 44px; /* Apple's recommended minimum touch target */
+    }
+    
+    #logout {
+        min-height: 44px;
+        padding: 12px 20px;
+    }
+    
+    /* Remove hover effects on touch devices */
+    .race-mode button:hover, .race-control button:hover, #logout:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Add active states for touch feedback */
+    .race-mode button:active, .race-control button:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+}
