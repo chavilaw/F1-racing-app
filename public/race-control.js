@@ -215,6 +215,9 @@ function timeExpired() {
     raceActive = false;
     updateButtonStates();
 
+    // this is the bug fixed for reviewer hello here
+    setRaceMode('danger');
+
     alert('Race completed');
 
     socket.emit('race-completed', { sessionId: currentSession?.id});

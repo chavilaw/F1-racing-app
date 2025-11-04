@@ -22,6 +22,17 @@ document.addEventListener('DOMContentLoaded', function () {
             active = payload.raceActive;
         }
         renderSession();
+
+        const paddockMessage = document.getElementById('paddockMessage');
+        if (paddockMessage && payload) { 
+            // Show message when FINNISH mode / timer = 0 / not active
+            if (payload.raceMode === "FINISH" || (payload.timeLeft === 0 && !payload.raceActive)) {
+                paddockMessage.textContent = 'Race ended, Proceed to paddock';
+                paddockMessage.style.display = 'block';
+            } else {
+                paddockMessage.style.display = 'none';
+            }
+        }
     });
 });
 
