@@ -66,6 +66,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             document.getElementById(`${raceModeData.mode}-mode-btn`).classList.add('active');
             
+            // for reviewer here hi
+            updateRaceControlBtn();
+            
             // Update race mode in the info panel
             document.getElementById('current-race-mode').textContent = currentRaceMode;
         }
@@ -288,6 +291,8 @@ function setRaceMode(mode) { //handle mode clicks
 
     document.getElementById(`${mode}-mode-btn`).classList.add('active');
 
+    updateRaceControlBtn();
+
     // Send race mode change to server for broadcast to all other interfaces
     socket.emit('race-mode-change', { mode, sessionId: currentSession?.id });
 
@@ -304,6 +309,25 @@ function setRaceMode(mode) { //handle mode clicks
     });
     
     console.log('Race mode updated to:', currentRaceMode);
+}
+function updateRaceControlBtn() {
+
+    // this is the bug fixed for reviewer hello here
+    // For Hide/Show race controls based on FINISH
+    const raceControlButtons = document.getElementById('race-control-buttons');
+    const endSessionContainer = document.getElementById('end-session-container');
+
+    if (currentRaceMode === 'FINISH') {
+        // Hide btn
+        if (raceControlButtons) raceControlButtons.style.display = 'none';
+        // Show end ses btn
+        if (endSessionContainer) endSessionContainer.style.display = 'flex';
+    } else {
+        // Show btn
+        if (raceControlButtons) raceControlButtons.style.display = 'flex';
+        // Hide end ses btn
+        if (endSessionContainer) endSessionContainer.style.display = 'none';
+    }
 }
 
 function initializeRaceControlButtons() {
@@ -340,6 +364,24 @@ function initializeRaceControlButtons() {
 
     updateButtonStates();
     }, 100); // 100ms delay
+
+    // this is the bug fixed for reviewer hello here
+    // To init End Ses btn
+    const endSessionBtn = document.getElementById('end-session-btn');
+
+    if (endSessionBtn) {
+        endSessionBtn.addEventListener('click', () => {
+            if (currentSession?.id) {
+                socket.emit('delete-session', { sessionId: currentSession.id}, (response) => {
+                    if (response && response.ok) {
+                        console.log('Race session ended:', response?.error)
+                    } else {
+                        console.error('Failed to end session:', response?.error)
+                    }
+                });
+            }
+        })
+    }
 }
 
 function updateButtonStates() {
