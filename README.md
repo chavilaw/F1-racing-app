@@ -9,7 +9,7 @@ The system is powered by **Node.js**, **Express**, and **Socket.IO**, enabling i
 ## Install & Setup
 
 1. Clone the Repository
-git clone https://gitea.kood.tech/iidapuomila/racetrack.git
+git clone https://github.com/chavilaw/F1-racing-app
 cd racetrack
 
 2. Install Dependencies
